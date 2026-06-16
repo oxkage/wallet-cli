@@ -3,70 +3,895 @@
   "version": 2,
   "source": "hermes-agent",
   "elements": [
-    { "type": "text", "id": "title", "x": 540, "y": 40, "width": 900, "height": 50, "text": "wallet-cli — plan-driven wallet runtime", "fontSize": 42, "fontFamily": 1, "strokeColor": "#1e1e1e", "originalText": "wallet-cli — plan-driven wallet runtime", "autoResize": true },
-    { "type": "text", "id": "subtitle", "x": 600, "y": 100, "width": 800, "height": 30, "text": "a transaction is data, not code: one path for every send", "fontSize": 24, "fontFamily": 1, "strokeColor": "#757575", "originalText": "a transaction is data, not code: one path for every send", "autoResize": true },
-
-    { "type": "rectangle", "id": "zone_in", "x": 60, "y": 180, "width": 460, "height": 720, "roundness": { "type": 3 }, "backgroundColor": "#e7f5ff", "fillStyle": "solid", "strokeColor": "#1971c2", "strokeWidth": 2 },
-    { "type": "text", "id": "zone_in_t", "x": 90, "y": 198, "width": 300, "height": 30, "text": "1 · INPUTS", "fontSize": 26, "fontFamily": 1, "strokeColor": "#1971c2", "originalText": "1 · INPUTS", "autoResize": true },
-
-    { "type": "rectangle", "id": "env", "x": 100, "y": 250, "width": 380, "height": 130, "roundness": { "type": 3 }, "backgroundColor": "#a5d8ff", "fillStyle": "solid", "boundElements": [{ "id": "t_env", "type": "text" }] },
-    { "type": "text", "id": "t_env", "x": 110, "y": 270, "width": 360, "height": 90, "text": ".env\nSEED_PHRASE  (HD wallets)\nALCHEMY_API_KEY  (one key)", "fontSize": 22, "fontFamily": 1, "strokeColor": "#1e1e1e", "textAlign": "center", "verticalAlign": "middle", "containerId": "env", "originalText": ".env\nSEED_PHRASE  (HD wallets)\nALCHEMY_API_KEY  (one key)", "autoResize": true },
-
-    { "type": "rectangle", "id": "scan", "x": 100, "y": 420, "width": 380, "height": 150, "roundness": { "type": 3 }, "backgroundColor": "#a5d8ff", "fillStyle": "solid", "boundElements": [{ "id": "t_scan", "type": "text" }] },
-    { "type": "text", "id": "t_scan", "x": 110, "y": 440, "width": 360, "height": 110, "text": "scan\nbatch-read native + token\nbalances over a wallet range\n→ the factual input", "fontSize": 22, "fontFamily": 1, "strokeColor": "#1e1e1e", "textAlign": "center", "verticalAlign": "middle", "containerId": "scan", "originalText": "scan\nbatch-read native + token\nbalances over a wallet range\n→ the factual input", "autoResize": true },
-
-    { "type": "rectangle", "id": "scaffold", "x": 100, "y": 610, "width": 380, "height": 250, "roundness": { "type": 3 }, "backgroundColor": "#d0bfff", "fillStyle": "solid", "boundElements": [{ "id": "t_scaffold", "type": "text" }] },
-    { "type": "text", "id": "t_scaffold", "x": 110, "y": 630, "width": 360, "height": 210, "text": "scaffold generators\nsweep · multisend · collect\ndistribute · csv\n\ndistribute: CLI computes\nper-wallet amounts\n(equal / jitter / fixed)\nsum-preserving — no LLM math", "fontSize": 21, "fontFamily": 1, "strokeColor": "#1e1e1e", "textAlign": "center", "verticalAlign": "middle", "containerId": "scaffold", "originalText": "scaffold generators\nsweep · multisend · collect\ndistribute · csv\n\ndistribute: CLI computes\nper-wallet amounts\n(equal / jitter / fixed)\nsum-preserving — no LLM math", "autoResize": true },
-
-    { "type": "rectangle", "id": "plan", "x": 620, "y": 400, "width": 360, "height": 200, "roundness": { "type": 3 }, "backgroundColor": "#fff3bf", "fillStyle": "solid", "strokeColor": "#f08c00", "strokeWidth": 3, "boundElements": [{ "id": "t_plan", "type": "text" }] },
-    { "type": "text", "id": "t_plan", "x": 630, "y": 420, "width": 340, "height": 160, "text": "PLAN JSON\nversion · chain · operations\n\n5 op types:\nnative-send · erc20-transfer\nerc20-approve · contract-call\nraw-tx", "fontSize": 21, "fontFamily": 1, "strokeColor": "#1e1e1e", "textAlign": "center", "verticalAlign": "middle", "containerId": "plan", "originalText": "PLAN JSON\nversion · chain · operations\n\n5 op types:\nnative-send · erc20-transfer\nerc20-approve · contract-call\nraw-tx", "autoResize": true },
-
-    { "type": "rectangle", "id": "zone_rt", "x": 1080, "y": 180, "width": 480, "height": 720, "roundness": { "type": 3 }, "backgroundColor": "#ebfbee", "fillStyle": "solid", "strokeColor": "#2f9e44", "strokeWidth": 2 },
-    { "type": "text", "id": "zone_rt_t", "x": 1110, "y": 198, "width": 400, "height": 30, "text": "2 · RUNTIME  (executePlan)", "fontSize": 26, "fontFamily": 1, "strokeColor": "#2f9e44", "originalText": "2 · RUNTIME  (executePlan)", "autoResize": true },
-
-    { "type": "rectangle", "id": "s_val", "x": 1120, "y": 250, "width": 400, "height": 90, "roundness": { "type": 3 }, "backgroundColor": "#b2f2bb", "fillStyle": "solid", "boundElements": [{ "id": "t_val", "type": "text" }] },
-    { "type": "text", "id": "t_val", "x": 1130, "y": 270, "width": 380, "height": 50, "text": "validate\nzod schema check (offline)", "fontSize": 22, "fontFamily": 1, "strokeColor": "#1e1e1e", "textAlign": "center", "verticalAlign": "middle", "containerId": "s_val", "originalText": "validate\nzod schema check (offline)", "autoResize": true },
-
-    { "type": "rectangle", "id": "s_sim", "x": 1120, "y": 370, "width": 400, "height": 90, "roundness": { "type": 3 }, "backgroundColor": "#b2f2bb", "fillStyle": "solid", "boundElements": [{ "id": "t_sim", "type": "text" }] },
-    { "type": "text", "id": "t_sim", "x": 1130, "y": 390, "width": 380, "height": 50, "text": "simulate\neth_call each op first", "fontSize": 22, "fontFamily": 1, "strokeColor": "#1e1e1e", "textAlign": "center", "verticalAlign": "middle", "containerId": "s_sim", "originalText": "simulate\neth_call each op first", "autoResize": true },
-
-    { "type": "rectangle", "id": "s_sign", "x": 1120, "y": 490, "width": 400, "height": 90, "roundness": { "type": 3 }, "backgroundColor": "#b2f2bb", "fillStyle": "solid", "boundElements": [{ "id": "t_sign", "type": "text" }] },
-    { "type": "text", "id": "t_sign", "x": 1130, "y": 510, "width": 380, "height": 50, "text": "sign\nnonce-safe, parallel scheduler", "fontSize": 22, "fontFamily": 1, "strokeColor": "#1e1e1e", "textAlign": "center", "verticalAlign": "middle", "containerId": "s_sign", "originalText": "sign\nnonce-safe, parallel scheduler", "autoResize": true },
-
-    { "type": "rectangle", "id": "s_bc", "x": 1120, "y": 610, "width": 400, "height": 90, "roundness": { "type": 3 }, "backgroundColor": "#b2f2bb", "fillStyle": "solid", "boundElements": [{ "id": "t_bc", "type": "text" }] },
-    { "type": "text", "id": "t_bc", "x": 1130, "y": 630, "width": 380, "height": 50, "text": "broadcast\ndry-run default · --yes to send", "fontSize": 22, "fontFamily": 1, "strokeColor": "#1e1e1e", "textAlign": "center", "verticalAlign": "middle", "containerId": "s_bc", "originalText": "broadcast\ndry-run default · --yes to send", "autoResize": true },
-
-    { "type": "rectangle", "id": "s_log", "x": 1120, "y": 730, "width": 400, "height": 90, "roundness": { "type": 3 }, "backgroundColor": "#b2f2bb", "fillStyle": "solid", "boundElements": [{ "id": "t_log", "type": "text" }] },
-    { "type": "text", "id": "t_log", "x": 1130, "y": 750, "width": 380, "height": 50, "text": "log\n→ tx-history.jsonl", "fontSize": 22, "fontFamily": 1, "strokeColor": "#1e1e1e", "textAlign": "center", "verticalAlign": "middle", "containerId": "s_log", "originalText": "log\n→ tx-history.jsonl", "autoResize": true },
-
-    { "type": "rectangle", "id": "rpc", "x": 620, "y": 680, "width": 360, "height": 180, "roundness": { "type": 3 }, "backgroundColor": "#ffd8a8", "fillStyle": "solid", "strokeColor": "#e8590c", "strokeWidth": 2, "boundElements": [{ "id": "t_rpc", "type": "text" }] },
-    { "type": "text", "id": "t_rpc", "x": 630, "y": 700, "width": 340, "height": 140, "text": "RPC layer\ngetChainsWithOverrides()\none chokepoint:\nALCHEMY_API_KEY → per-chain URL\npublic RPC fallback", "fontSize": 21, "fontFamily": 1, "strokeColor": "#1e1e1e", "textAlign": "center", "verticalAlign": "middle", "containerId": "rpc", "originalText": "RPC layer\ngetChainsWithOverrides()\none chokepoint:\nALCHEMY_API_KEY → per-chain URL\npublic RPC fallback", "autoResize": true },
-
-    { "type": "rectangle", "id": "chains", "x": 620, "y": 180, "width": 360, "height": 150, "roundness": { "type": 3 }, "backgroundColor": "#c3fae8", "fillStyle": "solid", "strokeColor": "#0ca678", "strokeWidth": 2, "boundElements": [{ "id": "t_chains", "type": "text" }] },
-    { "type": "text", "id": "t_chains", "x": 630, "y": 200, "width": 340, "height": 110, "text": "CHAINS\n27 EVM + Solana\nEthereum · Base · Arbitrum\nOptimism · Polygon · …", "fontSize": 21, "fontFamily": 1, "strokeColor": "#1e1e1e", "textAlign": "center", "verticalAlign": "middle", "containerId": "chains", "originalText": "CHAINS\n27 EVM + Solana\nEthereum · Base · Arbitrum\nOptimism · Polygon · …", "autoResize": true },
-
-    { "type": "rectangle", "id": "audit", "x": 620, "y": 920, "width": 940, "height": 110, "roundness": { "type": 3 }, "backgroundColor": "#ffc9c9", "fillStyle": "solid", "strokeColor": "#e03131", "strokeWidth": 2, "boundElements": [{ "id": "t_audit", "type": "text" }] },
-    { "type": "text", "id": "t_audit", "x": 630, "y": 945, "width": 920, "height": 60, "text": "audit — pre-push credential scan  (gate before git push)\n.env history · .gitignore · mnemonics · key shapes · RPC auth", "fontSize": 21, "fontFamily": 1, "strokeColor": "#1e1e1e", "textAlign": "center", "verticalAlign": "middle", "containerId": "audit", "originalText": "audit — pre-push credential scan  (gate before git push)\n.env history · .gitignore · mnemonics · key shapes · RPC auth", "autoResize": true },
-
-    { "type": "arrow", "id": "ar_scan_scaf", "x": 290, "y": 575, "width": 0, "height": 30, "points": [[0,0],[0,30]], "endArrowhead": "arrow", "strokeColor": "#1971c2", "strokeWidth": 2, "startBinding": { "elementId": "scan", "fixedPoint": [0.5, 1] }, "endBinding": { "elementId": "scaffold", "fixedPoint": [0.5, 0] } },
-
-    { "type": "arrow", "id": "ar_scaf_plan", "x": 485, "y": 680, "width": 130, "height": -150, "points": [[0,0],[135,-150]], "endArrowhead": "arrow", "strokeColor": "#7048e8", "strokeWidth": 3, "startBinding": { "elementId": "scaffold", "fixedPoint": [1, 0.3] }, "endBinding": { "elementId": "plan", "fixedPoint": [0, 0.7] }, "boundElements": [{ "id": "t_ar1", "type": "text" }] },
-    { "type": "text", "id": "t_ar1", "x": 500, "y": 580, "width": 110, "height": 25, "text": "emit plan", "fontSize": 20, "fontFamily": 1, "strokeColor": "#7048e8", "textAlign": "center", "verticalAlign": "middle", "containerId": "ar_scaf_plan", "originalText": "emit plan", "autoResize": true },
-
-    { "type": "arrow", "id": "ar_plan_rt", "x": 985, "y": 420, "width": 130, "height": -130, "points": [[0,0],[130,-130]], "endArrowhead": "arrow", "strokeColor": "#2f9e44", "strokeWidth": 3, "startBinding": { "elementId": "plan", "fixedPoint": [1, 0.1] }, "endBinding": { "elementId": "s_val", "fixedPoint": [0, 0.5] }, "boundElements": [{ "id": "t_ar2", "type": "text" }] },
-    { "type": "text", "id": "t_ar2", "x": 1000, "y": 320, "width": 110, "height": 25, "text": "run", "fontSize": 20, "fontFamily": 1, "strokeColor": "#2f9e44", "textAlign": "center", "verticalAlign": "middle", "containerId": "ar_plan_rt", "originalText": "run", "autoResize": true },
-
-    { "type": "arrow", "id": "ar_v_s", "x": 1320, "y": 340, "width": 0, "height": 30, "points": [[0,0],[0,30]], "endArrowhead": "arrow", "strokeColor": "#2f9e44", "strokeWidth": 2 },
-    { "type": "arrow", "id": "ar_s_sg", "x": 1320, "y": 460, "width": 0, "height": 30, "points": [[0,0],[0,30]], "endArrowhead": "arrow", "strokeColor": "#2f9e44", "strokeWidth": 2 },
-    { "type": "arrow", "id": "ar_sg_b", "x": 1320, "y": 580, "width": 0, "height": 30, "points": [[0,0],[0,30]], "endArrowhead": "arrow", "strokeColor": "#2f9e44", "strokeWidth": 2 },
-    { "type": "arrow", "id": "ar_b_l", "x": 1320, "y": 700, "width": 0, "height": 30, "points": [[0,0],[0,30]], "endArrowhead": "arrow", "strokeColor": "#2f9e44", "strokeWidth": 2 },
-
-    { "type": "arrow", "id": "ar_rpc_rt", "x": 985, "y": 730, "width": 130, "height": -150, "points": [[0,0],[130,-150]], "endArrowhead": "arrow", "strokeColor": "#e8590c", "strokeWidth": 3, "startBinding": { "elementId": "rpc", "fixedPoint": [1, 0.5] }, "endBinding": { "elementId": "s_sign", "fixedPoint": [0, 0.9] }, "boundElements": [{ "id": "t_ar3", "type": "text" }] },
-    { "type": "text", "id": "t_ar3", "x": 990, "y": 650, "width": 130, "height": 25, "text": "provider", "fontSize": 20, "fontFamily": 1, "strokeColor": "#e8590c", "textAlign": "center", "verticalAlign": "middle", "containerId": "ar_rpc_rt", "originalText": "provider", "autoResize": true },
-
-    { "type": "arrow", "id": "ar_chains_rpc", "x": 800, "y": 335, "width": 0, "height": 340, "points": [[0,0],[0,340]], "endArrowhead": "arrow", "strokeColor": "#0ca678", "strokeWidth": 2, "startBinding": { "elementId": "chains", "fixedPoint": [0.5, 1] }, "endBinding": { "elementId": "rpc", "fixedPoint": [0.5, 0] } },
-
-    { "type": "arrow", "id": "ar_env_scan", "x": 290, "y": 385, "width": 0, "height": 30, "points": [[0,0],[0,30]], "endArrowhead": "arrow", "strokeColor": "#1971c2", "strokeWidth": 2, "startBinding": { "elementId": "env", "fixedPoint": [0.5, 1] }, "endBinding": { "elementId": "scan", "fixedPoint": [0.5, 0] } }
+    {
+      "type": "text",
+      "id": "title",
+      "x": 540,
+      "y": 40,
+      "width": 900,
+      "height": 50,
+      "text": "wallet-cli — plan-driven wallet runtime",
+      "fontSize": 42,
+      "fontFamily": 1,
+      "strokeColor": "#1e1e1e",
+      "originalText": "wallet-cli — plan-driven wallet runtime",
+      "autoResize": true
+    },
+    {
+      "type": "text",
+      "id": "subtitle",
+      "x": 600,
+      "y": 100,
+      "width": 800,
+      "height": 30,
+      "text": "a transaction is data, not code: one path for every send",
+      "fontSize": 24,
+      "fontFamily": 1,
+      "strokeColor": "#757575",
+      "originalText": "a transaction is data, not code: one path for every send",
+      "autoResize": true
+    },
+    {
+      "type": "rectangle",
+      "id": "zone_in",
+      "x": 60,
+      "y": 180,
+      "width": 460,
+      "height": 720,
+      "roundness": {
+        "type": 3
+      },
+      "backgroundColor": "#e7f5ff",
+      "fillStyle": "solid",
+      "strokeColor": "#1971c2",
+      "strokeWidth": 2
+    },
+    {
+      "type": "text",
+      "id": "zone_in_t",
+      "x": 90,
+      "y": 198,
+      "width": 300,
+      "height": 30,
+      "text": "1 · INPUTS",
+      "fontSize": 26,
+      "fontFamily": 1,
+      "strokeColor": "#1971c2",
+      "originalText": "1 · INPUTS",
+      "autoResize": true
+    },
+    {
+      "type": "rectangle",
+      "id": "env",
+      "x": 100,
+      "y": 250,
+      "width": 380,
+      "height": 130,
+      "roundness": {
+        "type": 3
+      },
+      "backgroundColor": "#a5d8ff",
+      "fillStyle": "solid",
+      "boundElements": [
+        {
+          "id": "t_env",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "t_env",
+      "x": 110,
+      "y": 270,
+      "width": 360,
+      "height": 90,
+      "text": ".env\nSEED_PHRASE  (HD wallets)\nALCHEMY_API_KEY  (one key)",
+      "fontSize": 22,
+      "fontFamily": 1,
+      "strokeColor": "#1e1e1e",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "env",
+      "originalText": ".env\nSEED_PHRASE  (HD wallets)\nALCHEMY_API_KEY  (one key)",
+      "autoResize": true
+    },
+    {
+      "type": "rectangle",
+      "id": "scan",
+      "x": 100,
+      "y": 420,
+      "width": 380,
+      "height": 150,
+      "roundness": {
+        "type": 3
+      },
+      "backgroundColor": "#a5d8ff",
+      "fillStyle": "solid",
+      "boundElements": [
+        {
+          "id": "t_scan",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "t_scan",
+      "x": 110,
+      "y": 440,
+      "width": 360,
+      "height": 110,
+      "text": "scan\nbatch-read native + token\nbalances over a wallet range\n→ the factual input",
+      "fontSize": 22,
+      "fontFamily": 1,
+      "strokeColor": "#1e1e1e",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "scan",
+      "originalText": "scan\nbatch-read native + token\nbalances over a wallet range\n→ the factual input",
+      "autoResize": true
+    },
+    {
+      "type": "rectangle",
+      "id": "scaffold",
+      "x": 100,
+      "y": 610,
+      "width": 380,
+      "height": 250,
+      "roundness": {
+        "type": 3
+      },
+      "backgroundColor": "#d0bfff",
+      "fillStyle": "solid",
+      "boundElements": [
+        {
+          "id": "t_scaffold",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "t_scaffold",
+      "x": 110,
+      "y": 630,
+      "width": 360,
+      "height": 210,
+      "text": "scaffold generators\nsweep · multisend · collect\ndistribute · csv\n\ndistribute: CLI computes\nper-wallet amounts\n(equal / jitter / fixed)\nsum-preserving — no LLM math",
+      "fontSize": 21,
+      "fontFamily": 1,
+      "strokeColor": "#1e1e1e",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "scaffold",
+      "originalText": "scaffold generators\nsweep · multisend · collect\ndistribute · csv\n\ndistribute: CLI computes\nper-wallet amounts\n(equal / jitter / fixed)\nsum-preserving — no LLM math",
+      "autoResize": true
+    },
+    {
+      "type": "rectangle",
+      "id": "plan",
+      "x": 620,
+      "y": 400,
+      "width": 360,
+      "height": 200,
+      "roundness": {
+        "type": 3
+      },
+      "backgroundColor": "#fff3bf",
+      "fillStyle": "solid",
+      "strokeColor": "#f08c00",
+      "strokeWidth": 3,
+      "boundElements": [
+        {
+          "id": "t_plan",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "t_plan",
+      "x": 630,
+      "y": 420,
+      "width": 340,
+      "height": 160,
+      "text": "PLAN JSON\nversion · chain · operations\n\n5 op types:\nnative-send · erc20-transfer\nerc20-approve · contract-call\nraw-tx",
+      "fontSize": 21,
+      "fontFamily": 1,
+      "strokeColor": "#1e1e1e",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "plan",
+      "originalText": "PLAN JSON\nversion · chain · operations\n\n5 op types:\nnative-send · erc20-transfer\nerc20-approve · contract-call\nraw-tx",
+      "autoResize": true
+    },
+    {
+      "type": "rectangle",
+      "id": "zone_rt",
+      "x": 1080,
+      "y": 180,
+      "width": 480,
+      "height": 720,
+      "roundness": {
+        "type": 3
+      },
+      "backgroundColor": "#ebfbee",
+      "fillStyle": "solid",
+      "strokeColor": "#2f9e44",
+      "strokeWidth": 2
+    },
+    {
+      "type": "text",
+      "id": "zone_rt_t",
+      "x": 1110,
+      "y": 198,
+      "width": 400,
+      "height": 30,
+      "text": "2 · RUNTIME  (executePlan)",
+      "fontSize": 26,
+      "fontFamily": 1,
+      "strokeColor": "#2f9e44",
+      "originalText": "2 · RUNTIME  (executePlan)",
+      "autoResize": true
+    },
+    {
+      "type": "rectangle",
+      "id": "s_val",
+      "x": 1120,
+      "y": 250,
+      "width": 400,
+      "height": 90,
+      "roundness": {
+        "type": 3
+      },
+      "backgroundColor": "#b2f2bb",
+      "fillStyle": "solid",
+      "boundElements": [
+        {
+          "id": "t_val",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "t_val",
+      "x": 1130,
+      "y": 270,
+      "width": 380,
+      "height": 50,
+      "text": "validate\nzod schema check (offline)",
+      "fontSize": 22,
+      "fontFamily": 1,
+      "strokeColor": "#1e1e1e",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "s_val",
+      "originalText": "validate\nzod schema check (offline)",
+      "autoResize": true
+    },
+    {
+      "type": "rectangle",
+      "id": "s_sim",
+      "x": 1120,
+      "y": 370,
+      "width": 400,
+      "height": 90,
+      "roundness": {
+        "type": 3
+      },
+      "backgroundColor": "#b2f2bb",
+      "fillStyle": "solid",
+      "boundElements": [
+        {
+          "id": "t_sim",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "t_sim",
+      "x": 1130,
+      "y": 390,
+      "width": 380,
+      "height": 50,
+      "text": "simulate\neth_call each op first",
+      "fontSize": 22,
+      "fontFamily": 1,
+      "strokeColor": "#1e1e1e",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "s_sim",
+      "originalText": "simulate\neth_call each op first",
+      "autoResize": true
+    },
+    {
+      "type": "rectangle",
+      "id": "s_sign",
+      "x": 1120,
+      "y": 490,
+      "width": 400,
+      "height": 90,
+      "roundness": {
+        "type": 3
+      },
+      "backgroundColor": "#b2f2bb",
+      "fillStyle": "solid",
+      "boundElements": [
+        {
+          "id": "t_sign",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "t_sign",
+      "x": 1130,
+      "y": 510,
+      "width": 380,
+      "height": 50,
+      "text": "sign\nnonce-safe, parallel scheduler",
+      "fontSize": 22,
+      "fontFamily": 1,
+      "strokeColor": "#1e1e1e",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "s_sign",
+      "originalText": "sign\nnonce-safe, parallel scheduler",
+      "autoResize": true
+    },
+    {
+      "type": "rectangle",
+      "id": "s_bc",
+      "x": 1120,
+      "y": 610,
+      "width": 400,
+      "height": 90,
+      "roundness": {
+        "type": 3
+      },
+      "backgroundColor": "#b2f2bb",
+      "fillStyle": "solid",
+      "boundElements": [
+        {
+          "id": "t_bc",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "t_bc",
+      "x": 1130,
+      "y": 630,
+      "width": 380,
+      "height": 50,
+      "text": "broadcast\ndry-run default · --yes to send",
+      "fontSize": 22,
+      "fontFamily": 1,
+      "strokeColor": "#1e1e1e",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "s_bc",
+      "originalText": "broadcast\ndry-run default · --yes to send",
+      "autoResize": true
+    },
+    {
+      "type": "rectangle",
+      "id": "s_log",
+      "x": 1120,
+      "y": 730,
+      "width": 400,
+      "height": 90,
+      "roundness": {
+        "type": 3
+      },
+      "backgroundColor": "#b2f2bb",
+      "fillStyle": "solid",
+      "boundElements": [
+        {
+          "id": "t_log",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "t_log",
+      "x": 1130,
+      "y": 750,
+      "width": 380,
+      "height": 50,
+      "text": "log\n→ tx-history.jsonl",
+      "fontSize": 22,
+      "fontFamily": 1,
+      "strokeColor": "#1e1e1e",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "s_log",
+      "originalText": "log\n→ tx-history.jsonl",
+      "autoResize": true
+    },
+    {
+      "type": "rectangle",
+      "id": "rpc",
+      "x": 620,
+      "y": 680,
+      "width": 360,
+      "height": 180,
+      "roundness": {
+        "type": 3
+      },
+      "backgroundColor": "#ffd8a8",
+      "fillStyle": "solid",
+      "strokeColor": "#e8590c",
+      "strokeWidth": 2,
+      "boundElements": [
+        {
+          "id": "t_rpc",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "t_rpc",
+      "x": 630,
+      "y": 700,
+      "width": 340,
+      "height": 140,
+      "text": "RPC layer\ngetChainsWithOverrides()\none chokepoint:\nALCHEMY_API_KEY → per-chain URL\npublic RPC fallback",
+      "fontSize": 21,
+      "fontFamily": 1,
+      "strokeColor": "#1e1e1e",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "rpc",
+      "originalText": "RPC layer\ngetChainsWithOverrides()\none chokepoint:\nALCHEMY_API_KEY → per-chain URL\npublic RPC fallback",
+      "autoResize": true
+    },
+    {
+      "type": "rectangle",
+      "id": "chains",
+      "x": 620,
+      "y": 180,
+      "width": 360,
+      "height": 150,
+      "roundness": {
+        "type": 3
+      },
+      "backgroundColor": "#c3fae8",
+      "fillStyle": "solid",
+      "strokeColor": "#0ca678",
+      "strokeWidth": 2,
+      "boundElements": [
+        {
+          "id": "t_chains",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "t_chains",
+      "x": 630,
+      "y": 200,
+      "width": 340,
+      "height": 110,
+      "text": "CHAINS\n25 EVM chains\nEthereum · Base · Arbitrum\nOptimism · Polygon · …",
+      "fontSize": 21,
+      "fontFamily": 1,
+      "strokeColor": "#1e1e1e",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "chains",
+      "originalText": "CHAINS\n25 EVM chains\nEthereum · Base · Arbitrum\nOptimism · Polygon · …",
+      "autoResize": true
+    },
+    {
+      "type": "rectangle",
+      "id": "audit",
+      "x": 620,
+      "y": 920,
+      "width": 940,
+      "height": 110,
+      "roundness": {
+        "type": 3
+      },
+      "backgroundColor": "#ffc9c9",
+      "fillStyle": "solid",
+      "strokeColor": "#e03131",
+      "strokeWidth": 2,
+      "boundElements": [
+        {
+          "id": "t_audit",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "t_audit",
+      "x": 630,
+      "y": 945,
+      "width": 920,
+      "height": 60,
+      "text": "audit — pre-push credential scan  (gate before git push)\n.env history · .gitignore · mnemonics · key shapes · RPC auth",
+      "fontSize": 21,
+      "fontFamily": 1,
+      "strokeColor": "#1e1e1e",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "audit",
+      "originalText": "audit — pre-push credential scan  (gate before git push)\n.env history · .gitignore · mnemonics · key shapes · RPC auth",
+      "autoResize": true
+    },
+    {
+      "type": "arrow",
+      "id": "ar_scan_scaf",
+      "x": 290,
+      "y": 575,
+      "width": 0,
+      "height": 30,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          30
+        ]
+      ],
+      "endArrowhead": "arrow",
+      "strokeColor": "#1971c2",
+      "strokeWidth": 2,
+      "startBinding": {
+        "elementId": "scan",
+        "fixedPoint": [
+          0.5,
+          1
+        ]
+      },
+      "endBinding": {
+        "elementId": "scaffold",
+        "fixedPoint": [
+          0.5,
+          0
+        ]
+      }
+    },
+    {
+      "type": "arrow",
+      "id": "ar_scaf_plan",
+      "x": 485,
+      "y": 680,
+      "width": 130,
+      "height": -150,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          135,
+          -150
+        ]
+      ],
+      "endArrowhead": "arrow",
+      "strokeColor": "#7048e8",
+      "strokeWidth": 3,
+      "startBinding": {
+        "elementId": "scaffold",
+        "fixedPoint": [
+          1,
+          0.3
+        ]
+      },
+      "endBinding": {
+        "elementId": "plan",
+        "fixedPoint": [
+          0,
+          0.7
+        ]
+      },
+      "boundElements": [
+        {
+          "id": "t_ar1",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "t_ar1",
+      "x": 500,
+      "y": 580,
+      "width": 110,
+      "height": 25,
+      "text": "emit plan",
+      "fontSize": 20,
+      "fontFamily": 1,
+      "strokeColor": "#7048e8",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "ar_scaf_plan",
+      "originalText": "emit plan",
+      "autoResize": true
+    },
+    {
+      "type": "arrow",
+      "id": "ar_plan_rt",
+      "x": 985,
+      "y": 420,
+      "width": 130,
+      "height": -130,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          130,
+          -130
+        ]
+      ],
+      "endArrowhead": "arrow",
+      "strokeColor": "#2f9e44",
+      "strokeWidth": 3,
+      "startBinding": {
+        "elementId": "plan",
+        "fixedPoint": [
+          1,
+          0.1
+        ]
+      },
+      "endBinding": {
+        "elementId": "s_val",
+        "fixedPoint": [
+          0,
+          0.5
+        ]
+      },
+      "boundElements": [
+        {
+          "id": "t_ar2",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "t_ar2",
+      "x": 1000,
+      "y": 320,
+      "width": 110,
+      "height": 25,
+      "text": "run",
+      "fontSize": 20,
+      "fontFamily": 1,
+      "strokeColor": "#2f9e44",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "ar_plan_rt",
+      "originalText": "run",
+      "autoResize": true
+    },
+    {
+      "type": "arrow",
+      "id": "ar_v_s",
+      "x": 1320,
+      "y": 340,
+      "width": 0,
+      "height": 30,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          30
+        ]
+      ],
+      "endArrowhead": "arrow",
+      "strokeColor": "#2f9e44",
+      "strokeWidth": 2
+    },
+    {
+      "type": "arrow",
+      "id": "ar_s_sg",
+      "x": 1320,
+      "y": 460,
+      "width": 0,
+      "height": 30,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          30
+        ]
+      ],
+      "endArrowhead": "arrow",
+      "strokeColor": "#2f9e44",
+      "strokeWidth": 2
+    },
+    {
+      "type": "arrow",
+      "id": "ar_sg_b",
+      "x": 1320,
+      "y": 580,
+      "width": 0,
+      "height": 30,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          30
+        ]
+      ],
+      "endArrowhead": "arrow",
+      "strokeColor": "#2f9e44",
+      "strokeWidth": 2
+    },
+    {
+      "type": "arrow",
+      "id": "ar_b_l",
+      "x": 1320,
+      "y": 700,
+      "width": 0,
+      "height": 30,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          30
+        ]
+      ],
+      "endArrowhead": "arrow",
+      "strokeColor": "#2f9e44",
+      "strokeWidth": 2
+    },
+    {
+      "type": "arrow",
+      "id": "ar_rpc_rt",
+      "x": 985,
+      "y": 730,
+      "width": 130,
+      "height": -150,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          130,
+          -150
+        ]
+      ],
+      "endArrowhead": "arrow",
+      "strokeColor": "#e8590c",
+      "strokeWidth": 3,
+      "startBinding": {
+        "elementId": "rpc",
+        "fixedPoint": [
+          1,
+          0.5
+        ]
+      },
+      "endBinding": {
+        "elementId": "s_sign",
+        "fixedPoint": [
+          0,
+          0.9
+        ]
+      },
+      "boundElements": [
+        {
+          "id": "t_ar3",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "t_ar3",
+      "x": 990,
+      "y": 650,
+      "width": 130,
+      "height": 25,
+      "text": "provider",
+      "fontSize": 20,
+      "fontFamily": 1,
+      "strokeColor": "#e8590c",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "ar_rpc_rt",
+      "originalText": "provider",
+      "autoResize": true
+    },
+    {
+      "type": "arrow",
+      "id": "ar_chains_rpc",
+      "x": 800,
+      "y": 335,
+      "width": 0,
+      "height": 340,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          340
+        ]
+      ],
+      "endArrowhead": "arrow",
+      "strokeColor": "#0ca678",
+      "strokeWidth": 2,
+      "startBinding": {
+        "elementId": "chains",
+        "fixedPoint": [
+          0.5,
+          1
+        ]
+      },
+      "endBinding": {
+        "elementId": "rpc",
+        "fixedPoint": [
+          0.5,
+          0
+        ]
+      }
+    },
+    {
+      "type": "arrow",
+      "id": "ar_env_scan",
+      "x": 290,
+      "y": 385,
+      "width": 0,
+      "height": 30,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          30
+        ]
+      ],
+      "endArrowhead": "arrow",
+      "strokeColor": "#1971c2",
+      "strokeWidth": 2,
+      "startBinding": {
+        "elementId": "env",
+        "fixedPoint": [
+          0.5,
+          1
+        ]
+      },
+      "endBinding": {
+        "elementId": "scan",
+        "fixedPoint": [
+          0.5,
+          0
+        ]
+      }
+    }
   ],
   "appState": {
     "viewBackgroundColor": "#ffffff"

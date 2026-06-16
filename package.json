@@ -1,7 +1,7 @@
 {
   "name": "wallet-cli",
   "version": "0.2.0",
-  "description": "Plan-driven CLI for burner-wallet operations across EVM chains and Solana",
+  "description": "Plan-driven CLI for burner-wallet operations across EVM chains",
   "type": "commonjs",
   "license": "MIT",
   "author": "oxkage",
@@ -22,7 +22,6 @@
     "test:smoke": "node dist/index.js chains list && node dist/index.js validate"
   },
   "dependencies": {
-    "@solana/web3.js": "^1.98.4",
     "chalk": "^5.3.0",
     "cli-table3": "^0.6.5",
     "commander": "^12.1.0",
