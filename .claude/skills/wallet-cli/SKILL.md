@@ -2,14 +2,15 @@
 name: wallet-cli
 description: >
   Plan-driven CLI for burner-wallet operations across EVM chains and Solana —
-  send native/ERC-20 tokens, approve spenders, call contracts, send raw
-  transactions, batch-scan balances, and split/airdrop funds across many
-  wallets. A transaction is data (a JSON plan), not hand-written code. Use this
-  skill WHENEVER the user wants to move crypto, sweep or consolidate wallets,
-  distribute or airdrop tokens to many addresses, approve a spender, call a
-  contract method, or check balances across wallets — even if they don't name
-  the tool explicitly. Also use it before any git push in a repo containing this
-  tool (run the credential audit).
+  send native/ERC-20 tokens, transfer and approve ERC-721 NFTs, approve
+  spenders, call contracts, send raw transactions, batch-scan balances, and
+  split/airdrop funds across many wallets. A transaction is data (a JSON plan),
+  not hand-written code. Use this skill WHENEVER the user wants to move crypto,
+  transfer or approve an NFT, sweep or consolidate wallets, distribute or
+  airdrop tokens to many addresses, approve a spender, call a contract method,
+  or check balances across wallets — even if they don't name the tool
+  explicitly. Also use it before any git push in a repo containing this tool
+  (run the credential audit).
 ---
 
 # Using wallet-cli
@@ -45,13 +46,15 @@ write a JSON plan; let the CLI execute it deterministically.
 6. **Broadcast** — `run <plan> --yes` only when you intend to send.
 7. **Confirm** — every broadcast is logged; query it with `history`.
 
-## The 5 op types
+## The 7 op types
 
 | Type | Does | Generate with |
 | --- | --- | --- |
 | `native-send` | Send the chain's native coin (ETH, etc.) | `scaffold sweep` / hand-write |
 | `erc20-transfer` | Send an ERC-20 token | `scaffold multisend` / `distribute` |
 | `erc20-approve` | Approve a spender allowance | hand-write (`ops describe erc20-approve`) |
+| `erc721-transfer` | Transfer an NFT (verifies ownership first) | `scaffold sweep-nft` / `distribute-nft`, or `ops describe erc721-transfer` |
+| `erc721-approve` | Approve one NFT (`tokenId`) or a whole collection (`all:true`) | hand-write (`ops describe erc721-approve`) |
 | `contract-call` | Call an arbitrary contract method | hand-write (`ops describe contract-call`) |
 | `raw-tx` | Broadcast pre-built calldata | hand-write |
 
@@ -94,6 +97,42 @@ native for fees.
 node dist/index.js ops describe erc20-approve > approve.json   # edit token/spender/amount
 node dist/index.js validate approve.json && node dist/index.js run approve.json --yes
 ```
+
+**Transfer an NFT (ERC-721)**
+```bash
+node dist/index.js ops describe erc721-transfer > nft.json   # edit contract/tokenId/to
+node dist/index.js validate nft.json && node dist/index.js run nft.json --yes
+```
+Ownership is checked before broadcast. `safeTransferFrom` is used by default; add
+`"safe": false` to the op for plain `transferFrom`.
+
+**Approve an NFT (single token or whole collection)**
+```bash
+node dist/index.js ops describe erc721-approve > nft-approve.json
+# single NFT: set "tokenId"; collection-wide: set "all": true (uses setApprovalForAll)
+# revoke a collection grant: "all": true, "approved": false
+node dist/index.js validate nft-approve.json && node dist/index.js run nft-approve.json --yes
+```
+
+**Sweep all NFTs of a collection from many wallets → one vault**
+```bash
+# Ownership is enumerated via the Alchemy NFT API (needs ALCHEMY_API_KEY).
+node dist/index.js scaffold sweep-nft --chain base --contract 0xCollection \
+  --from-idx 0 --to-idx 50 --to 0xVault --out nft-sweep.json
+node dist/index.js validate nft-sweep.json && node dist/index.js run nft-sweep.json --yes
+```
+
+**Distribute one wallet's NFTs across many recipients (round-robin)**
+```bash
+node dist/index.js scaffold distribute-nft --chain base --from 0 \
+  --contract 0xCollection --recipients 0xaaa,0xbbb,0xccc --out nft-dist.json
+# Or hand-pick tokenIds (no key needed — skips enumeration):
+node dist/index.js scaffold distribute-nft --chain base --from 0 \
+  --contract 0xCollection --recipients 0xaaa,0xbbb --token-ids 100,101,102
+node dist/index.js validate nft-dist.json && node dist/index.js run nft-dist.json --yes
+```
+Both default to `safeTransferFrom` (`--unsafe` for plain `transferFrom`). Each op
+re-checks ownership on-chain at run time, so stale enumeration can't push a bad tx.
 
 **Inspect**
 ```bash

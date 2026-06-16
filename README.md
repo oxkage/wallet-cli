@@ -42,7 +42,7 @@ wei moves.
 
 ## Features
 
-- **One runtime, five op types** — `native-send`, `erc20-transfer`, `erc20-approve`, `contract-call`, `raw-tx`
+- **One runtime, seven op types** — `native-send`, `erc20-transfer`, `erc20-approve`, `erc721-transfer`, `erc721-approve`, `contract-call`, `raw-tx`
 - **Scaffold generators** — `sweep`, `multisend`, `collect`, `distribute`, `csv` write ready-to-run plan JSON
 - **`scan`** — batch-read native + token balances across a wallet range; the factual input for sweep/distribute
 - **`distribute`** — split a balance across many wallets; the CLI does the math (equal / jitter / fixed), never you
@@ -156,6 +156,8 @@ Any `value` / `amount` field accepts:
 | `native-send` | `id, to, value` | Send the native gas token (ETH, MATIC, …) |
 | `erc20-transfer` | `id, token, to, amount` | `transfer(to, amount)`. `token` is a registry symbol or 0x address. `"all"` reads `balanceOf` on-chain. |
 | `erc20-approve` | `id, token, spender, amount` | `approve(spender, amount)`. Use `"unlimited"` for `MaxUint256`. |
+| `erc721-transfer` | `id, contract, tokenId, to` | Transfer an NFT. Verifies ownership first. `safeTransferFrom` by default; set `safe:false` for `transferFrom`. |
+| `erc721-approve` | `id, contract, spender` + `tokenId` _or_ `all` | `approve(spender, tokenId)` for one NFT, or `setApprovalForAll(spender, approved)` when `all:true`. `approved:false` revokes. |
 | `contract-call` | `id, to, abi, fn, args` | Encode any call. `abi` = built-in alias (`erc20`/`erc721`/`permit2`), inline JSON, or a file path. |
 | `raw-tx` | `id, from, to, data` | Fully manual EIP-1559 tx with raw calldata. |
 
@@ -241,6 +243,34 @@ node dist/index.js scaffold csv recipients.csv --out out/multi
 # → out/multi.base.json, out/multi.optimism.json, …
 ```
 
+### NFTs (ERC-721)
+
+NFTs are identified by **collection address + tokenId** — there's no "list my
+tokens" call in the ERC-721 standard, so ownership is enumerated via the
+**Alchemy NFT API** (set `ALCHEMY_API_KEY`). Without a key it falls back to
+on-chain `ERC721Enumerable`, which only works for collections that implement it.
+
+```bash
+# Sweep: drain every owned NFT of a collection, from a wallet range, to one dest
+node dist/index.js scaffold sweep-nft --chain Base --contract 0xCollection \
+  --from-idx 0 --to-idx 50 --to 0xVault --out nft-sweep.json
+node dist/index.js run nft-sweep.json --yes
+
+# Distribute: spread one wallet's NFTs across many recipients (round-robin)
+node dist/index.js scaffold distribute-nft --chain Base --from 0 \
+  --contract 0xCollection \
+  --recipients 0xaaa,0xbbb,0xccc --out nft-dist.json
+node dist/index.js run nft-dist.json --yes
+
+# Distribute specific tokenIds (skips enumeration — no key needed)
+node dist/index.js scaffold distribute-nft --chain Base --from 0 \
+  --contract 0xCollection --recipients 0xaaa,0xbbb --token-ids 100,101,102
+```
+
+Both emit `erc721-transfer` ops (`safeTransferFrom` by default; `--unsafe` for
+plain `transferFrom`). Each op re-verifies ownership on-chain at run time, so a
+stale enumeration can't push a doomed transfer.
+
 ### Inspect and manage
 
 ```bash
@@ -258,6 +288,10 @@ Ready to run in [`examples/`](./examples/):
 - [`hello.json`](./examples/hello.json) — minimal native-send
 - [`contract-call.json`](./examples/contract-call.json) — `erc20.transfer` via `contract-call`
 - [`erc20-approve.json`](./examples/erc20-approve.json) — unlimited USDC approval
+- [`erc721-transfer.json`](./examples/erc721-transfer.json) — transfer an NFT (verifies ownership)
+- [`erc721-approve.json`](./examples/erc721-approve.json) — collection-wide `setApprovalForAll`
+- [`sweep-nft.json`](./examples/sweep-nft.json) — sweep NFTs from many wallets to one vault
+- [`distribute-nft.json`](./examples/distribute-nft.json) — round-robin NFT distribution to recipients
 
 ## Safety
 
