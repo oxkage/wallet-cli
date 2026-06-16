@@ -17,8 +17,13 @@ const paramsSchema = z.object({
   from: z.string().optional(),
   fromIndex: z.coerce.number().int().min(0).optional(),
   to: addressSchema,
-  abi: z.string().min(1),          // alias ("erc20"/"erc721"/"permit2"), file path, or inline JSON
-  fn: z.string().min(1),            // e.g. "transfer(address,uint256)"
+  // OPTIONAL. When omitted, the Interface is built directly from `fn` as a
+  // human-readable signature — for a fixed-arg call you don't need an ABI at
+  // all. Provide `abi` only when `fn` is a bare name (no params) that must be
+  // looked up in an alias/file/JSON, or when you want type-checking against a
+  // full ABI. Accepts alias (erc20/erc721/permit2), file path, or inline JSON.
+  abi: z.string().min(1).optional(),
+  fn: z.string().min(1),            // full signature e.g. "transfer(address,uint256)" (preferred), or a bare name when `abi` is given
   args: z.array(z.string()).default([]),
   value: z.string().regex(/^(0|wei:\d+)$/).default("0"),
 });
@@ -64,6 +69,42 @@ function resolveAbiString(input: string): string {
   return input;
 }
 
+/**
+ * Build an ethers Interface for a call.
+ *
+ * - If `abi` is provided → resolve it (alias / file / inline JSON) as before.
+ * - If `abi` is omitted → build the Interface directly from `fn` treated as a
+ *   human-readable signature, e.g. "mint(uint256,uint256)". ethers parses this
+ *   into a full function fragment, so no ABI is needed for a fixed-arg call.
+ *   This is the common case: you know the function you want to call, you just
+ *   give its signature. A verified-on-Etherscan contract doesn't require you to
+ *   fetch its ABI first — the signature carries everything needed to encode.
+ *
+ * Note: if `abi` is omitted, `fn` MUST be a full signature (with the param
+ * list). A bare name like "mint" can't be encoded without knowing the types,
+ * so it requires an `abi` to look up.
+ */
+function resolveInterface(abi: string | undefined, fn: string): ethers.Interface {
+  if (abi !== undefined && abi.trim().length > 0) {
+    return new ethers.Interface(resolveAbiString(abi));
+  }
+  // No ABI: derive the fragment from the signature itself.
+  if (!/\(.*\)/.test(fn)) {
+    throw new Error(
+      `contract-call: fn "${fn}" is a bare name but no abi was given. ` +
+        `Either pass a full signature like "mint(uint256,uint256)", or provide --abi to look the name up.`
+    );
+  }
+  try {
+    return new ethers.Interface([`function ${fn}`]);
+  } catch (e: any) {
+    throw new Error(
+      `contract-call: could not parse fn signature "${fn}" (${e?.shortMessage ?? e?.message ?? e}). ` +
+        `Use a full human-readable signature, e.g. "mint(uint256,uint256)" or "claim(address,uint256)".`
+    );
+  }
+}
+
 async function build(params: Params, ctx: any) {
   // ctx is unused for chain-specific lookups here, but we touch it to keep
   // the helper chain consistent with other ops.
@@ -73,8 +114,7 @@ async function build(params: Params, ctx: any) {
   if (!fromAddress) throw new Error("contract-call: missing from address (internal: should be resolved by execute loop)");
   const signer = await ctx.resolveSigner(fromAddress);
 
-  const abiSource = resolveAbiString(params.abi);
-  const iface = new ethers.Interface(abiSource);
+  const iface = resolveInterface(params.abi, params.fn);
 
   // Coerce args from string to the ethers expected JS values.
   // ethers.Interface.encodeFunctionData will accept strings for the common
