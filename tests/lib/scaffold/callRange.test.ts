@@ -198,3 +198,100 @@ test("call-range: builtin ABI alias (erc721) resolves", () => {
   });
   assert.equal(plan.operations.length, 2);
 });
+
+// --- ABI-optional: signature alone is enough to encode ---
+
+test("call-range: no abi — full fn signature encodes without an ABI", () => {
+  const plan = generateCallRangePlan({
+    chain: "Base",
+    to: CONTRACT,
+    // no abi field at all
+    fn: "mint(uint256,uint256)",
+    args: ["0", "1"],
+    fromIdx: 1,
+    toIdx: 3,
+  });
+  assert.equal(plan.operations.length, 3);
+  const op = plan.operations[0] as any;
+  // The op must NOT carry an abi field — it derives the Interface from fn.
+  assert.equal("abi" in op, false);
+  assert.equal(op.fn, "mint(uint256,uint256)");
+  assert.deepEqual(op.args, ["0", "1"]);
+});
+
+test("call-range: no abi + bare fn name throws (types unknown)", () => {
+  assert.throws(
+    () =>
+      generateCallRangePlan({
+        chain: "Base",
+        to: CONTRACT,
+        fn: "mint", // bare name, no params, no abi
+        args: ["0", "1"],
+        fromIdx: 1,
+        toIdx: 3,
+      }),
+    /bare name but no abi/
+  );
+});
+
+test("call-range: no abi + arg count mismatch against signature throws", () => {
+  assert.throws(
+    () =>
+      generateCallRangePlan({
+        chain: "Base",
+        to: CONTRACT,
+        fn: "mint(uint256,uint256)",
+        args: ["0"], // only 1 of 2
+        fromIdx: 1,
+        toIdx: 3,
+      }),
+    /expects 2 arg\(s\), got 1/
+  );
+});
+
+test("call-range: no abi + non-encodable arg against signature throws", () => {
+  assert.throws(
+    () =>
+      generateCallRangePlan({
+        chain: "Base",
+        to: CONTRACT,
+        fn: "mint(uint256,uint256)",
+        args: ["notanumber", "1"],
+        fromIdx: 1,
+        toIdx: 3,
+      }),
+    /do not encode/
+  );
+});
+
+test("call-range: no abi + empty fn parens throws (unparseable)", () => {
+  assert.throws(
+    () =>
+      generateCallRangePlan({
+        chain: "Base",
+        to: CONTRACT,
+        fn: "()",
+        args: [],
+        fromIdx: 1,
+        toIdx: 2,
+      }),
+    /parse fn signature|could not parse|do not encode|invalid function/
+  );
+});
+
+// --- parallel / throttle options pass through to plan.options ---
+
+test("call-range: options batchSize + delayMs land on the plan", () => {
+  const plan = generateCallRangePlan({
+    chain: "Base",
+    to: CONTRACT,
+    fn: "claim()",
+    args: [],
+    fromIdx: 1,
+    toIdx: 10,
+    options: { batchSize: 5, delayMs: 200 },
+  });
+  assert.equal((plan.options as any).batchSize, 5);
+  assert.equal((plan.options as any).delayMs, 200);
+});
+

@@ -30,13 +30,23 @@ export function runCommand(): Command {
     .option("--yes", "Broadcast txs (default is dry-run)", false)
     .option("--simulate", "eth_call each op before broadcast (default true for broadcast)", true)
     .option("--stop-on-error", "Halt at first failure (default: continue, report all)", false)
+    .option("--parallel <N>", "Override plan batchSize: broadcast from up to N wallets concurrently (per-address nonce ordering preserved)", (v) => Math.max(1, parseInt(v, 10)))
+    .option("--delay-ms <ms>", "Override plan delayMs: throttle between txs within each wallet (stay under RPC rate limits)", (v) => Math.max(0, parseInt(v, 10)))
     .option("--json", "Emit only the final structured result as JSON (no live progress)", false)
     .action(
       async (
         planArg: string | undefined,
-        opts: { yes: boolean; simulate: boolean; stopOnError: boolean; json: boolean }
+        opts: { yes: boolean; simulate: boolean; stopOnError: boolean; parallel?: number; delayMs?: number; json: boolean }
       ) => {
         const plan = await loadPlan(planArg);
+        // CLI overrides for concurrency/throttle (don't require regenerating the plan).
+        if (opts.parallel !== undefined || opts.delayMs !== undefined) {
+          plan.options = {
+            ...(plan.options ?? {}),
+            ...(opts.parallel !== undefined ? { batchSize: opts.parallel } : {}),
+            ...(opts.delayMs !== undefined ? { delayMs: opts.delayMs } : {}),
+          } as typeof plan.options;
+        }
         const ctx = await buildContext(plan, /* cliDryRun */ !opts.yes);
         if (opts.simulate === false) ctx.simulate = false;
         if (opts.stopOnError) ctx.stopOnError = true;

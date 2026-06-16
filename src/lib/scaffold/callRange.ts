@@ -19,8 +19,8 @@ import { BUILTIN_ABIS } from "../abi/builtin";
 export interface CallRangeOpts {
   chain: string;
   to: string; // contract address
-  abi: string; // alias ("erc20"/"erc721"/"permit2"), file path, or inline JSON
-  fn: string; // e.g. "mint(uint256,uint256)"
+  abi?: string; // OPTIONAL — alias/path/inline JSON. Omit to derive from fn signature.
+  fn: string; // full signature e.g. "mint(uint256,uint256)" — required when abi omitted
   args: string[]; // fixed args applied to EVERY call
   fromIdx: number;
   toIdx: number;
@@ -29,7 +29,7 @@ export interface CallRangeOpts {
   /** Wallet indices to skip within the range. */
   skip?: number[];
   name?: string;
-  options?: Plan["options"];
+  options?: Partial<NonNullable<Plan["options"]>>;
 }
 
 export function generateCallRangePlan(opts: CallRangeOpts): Plan {
@@ -63,11 +63,15 @@ export function generateCallRangePlan(opts: CallRangeOpts): Plan {
       type: "contract-call",
       fromIndex: i,
       to: opts.to,
-      abi: opts.abi,
       fn: opts.fn,
       args: opts.args,
       value,
     };
+    // Only attach abi when explicitly provided — otherwise the op derives the
+    // Interface from the fn signature (no ABI needed).
+    if (opts.abi !== undefined && opts.abi.trim().length > 0) {
+      op.abi = opts.abi;
+    }
     operations.push(op as unknown as PlanOperation);
   }
 
@@ -82,12 +86,41 @@ export function generateCallRangePlan(opts: CallRangeOpts): Plan {
     name: opts.name ?? "call-range",
     chain: opts.chain,
     operations,
-    options: opts.options,
+    options: opts.options as unknown as Plan["options"],
   };
 }
 
-/** Resolve ABI → Interface, locate fn, encode args. Throws on any mismatch. */
-function validateCall(abi: string, fn: string, args: string[]): void {
+/** Resolve ABI → Interface, locate fn, encode args. Throws on any mismatch.
+ * When `abi` is undefined, the Interface is derived from `fn` as a
+ * human-readable signature (no ABI required). */
+function validateCall(abi: string | undefined, fn: string, args: string[]): void {
+  // No ABI: derive the fragment from the signature itself, then encode.
+  if (abi === undefined || abi.trim().length === 0) {
+    if (!/\(.*\)/.test(fn)) {
+      throw new Error(
+        `fn "${fn}" is a bare name but no abi was given. Pass a full signature like "mint(uint256,uint256)", or provide --abi.`
+      );
+    }
+    let iface: ethers.Interface;
+    try {
+      iface = new ethers.Interface([`function ${fn}`]);
+    } catch (e: any) {
+      throw new Error(`could not parse fn signature "${fn}": ${e?.shortMessage ?? e?.message ?? e}`);
+    }
+    const fragment = iface.getFunction(fn.includes("(") ? fn.slice(0, fn.indexOf("(")) : fn);
+    if (fragment && args.length !== fragment.inputs.length) {
+      throw new Error(
+        `fn "${fn}" expects ${fragment.inputs.length} arg(s), got ${args.length}: [${args.join(", ")}]`
+      );
+    }
+    try {
+      iface.encodeFunctionData(fn, args);
+    } catch (e: any) {
+      throw new Error(`args do not encode against "${fn}": ${e?.shortMessage ?? e?.message ?? e}`);
+    }
+    return;
+  }
+
   const alias = abi.trim().toLowerCase();
   let abiJson: string;
   if (BUILTIN_ABIS[alias]) {

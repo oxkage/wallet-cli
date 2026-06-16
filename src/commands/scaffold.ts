@@ -503,13 +503,15 @@ export function scaffoldCommand(): Command {
     .description("Generate a plan that broadcasts the SAME contract call from every wallet in [fromIdx, toIdx]. Canonical use: batch mint/claim/register with fixed args (e.g. mint(0,1) from idx 1..99). Fund the range first with 'scaffold distribute'.")
     .requiredOption("--chain <nameOrChainId>", "Chain name or chainId")
     .requiredOption("--to <address>", "Contract 0x address to call")
-    .requiredOption("--fn <signature>", "Full function signature, e.g. \"mint(uint256,uint256)\"")
+    .requiredOption("--fn <signature>", "Full function signature, e.g. \"mint(uint256,uint256)\". No ABI needed — the signature is enough to encode.")
     .requiredOption("--from-idx <N>", "First wallet index (inclusive)", (v) => indexArg.parse(v))
     .requiredOption("--to-idx <N>", "Last wallet index (inclusive)", (v) => indexArg.parse(v))
-    .option("--abi <aliasOrPathOrJson>", "ABI alias (erc20/erc721/permit2), file path, or inline JSON", "erc721")
+    .option("--abi <aliasOrPathOrJson>", "OPTIONAL. Only needed if --fn is a bare name. ABI alias (erc20/erc721/permit2), file path, or inline JSON.")
     .option("--args <list>", "Comma-separated fixed args applied to EVERY call (e.g. '0,1'). Use '' for no args.", "")
     .option("--value <amount>", "Per-call native value: '0' or 'wei:N' (for paid mints)", "0")
     .option("--skip <list>", "Comma-separated wallet indices to skip", (v: string) => v.split(",").map((s) => Number(s.trim())).filter((n) => Number.isFinite(n)))
+    .option("--parallel <N>", "Broadcast from up to N wallets concurrently (sets plan batchSize). Default 1 = sequential. Different wallets are independent; the per-address nonce manager keeps each wallet's own txs ordered.", (v) => indexArg.parse(v))
+    .option("--delay-ms <ms>", "Throttle: wait this many ms between txs (helps stay under RPC rate limits, e.g. Alchemy). Applied within each wallet's sequence.", (v) => indexArg.parse(v))
     .option("--name <name>", "Plan name", "call-range")
     .option("--out <file>", "Output plan JSON file (default: stdout)")
     .action((opts: {
@@ -518,10 +520,12 @@ export function scaffoldCommand(): Command {
       fn: string;
       fromIdx: number;
       toIdx: number;
-      abi: string;
+      abi?: string;
       args: string;
       value: string;
       skip?: number[];
+      parallel?: number;
+      delayMs?: number;
       name: string;
       out?: string;
     }) => {
@@ -530,6 +534,14 @@ export function scaffoldCommand(): Command {
       const args = opts.args.trim().length === 0
         ? []
         : opts.args.split(",").map((s) => s.trim());
+
+      const options =
+        opts.parallel !== undefined || opts.delayMs !== undefined
+          ? {
+              ...(opts.parallel !== undefined ? { batchSize: opts.parallel } : {}),
+              ...(opts.delayMs !== undefined ? { delayMs: opts.delayMs } : {}),
+            }
+          : undefined;
 
       const plan = generateCallRangePlan({
         chain: chain.name,
@@ -542,10 +554,12 @@ export function scaffoldCommand(): Command {
         value: opts.value,
         skip: opts.skip,
         name: opts.name,
+        options,
       });
       const { written } = writePlan(plan, opts.out);
       if (opts.out) {
-        console.error(chalk.green(`✔ Wrote call-range plan: ${plan.operations.length} calls of ${opts.fn} from idx ${opts.fromIdx}..${opts.toIdx} to ${written}`));
+        const par = opts.parallel ? ` (parallel=${opts.parallel})` : "";
+        console.error(chalk.green(`✔ Wrote call-range plan: ${plan.operations.length} calls of ${opts.fn} from idx ${opts.fromIdx}..${opts.toIdx}${par} to ${written}`));
         console.error(summarizeCallRangePlan(plan));
       }
     });
