@@ -1,0 +1,38 @@
+{
+  "name": "wallet-cli",
+  "version": "0.2.0",
+  "description": "Plan-driven CLI for burner-wallet operations across EVM chains and Solana",
+  "type": "commonjs",
+  "license": "MIT",
+  "author": "oxkage",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/oxkage/wallet-cli.git"
+  },
+  "bin": {
+    "wallet-cli": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsx src/index.ts",
+    "start": "node dist/index.js",
+    "check": "tsc --noEmit -p tsconfig.json",
+    "check:tests": "tsc --noEmit -p tsconfig.test.json",
+    "test": "tsx --test --test-reporter=spec \"tests/**/*.test.ts\"",
+    "test:smoke": "node dist/index.js chains list && node dist/index.js validate"
+  },
+  "dependencies": {
+    "@solana/web3.js": "^1.98.4",
+    "chalk": "^5.3.0",
+    "cli-table3": "^0.6.5",
+    "commander": "^12.1.0",
+    "dotenv": "^16.4.5",
+    "ethers": "^6.13.2",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.1",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}

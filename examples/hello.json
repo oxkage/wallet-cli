@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "name": "example-hello-usd",
+  "chain": "Base",
+  "defaultFromIndex": 0,
+  "operations": [
+    {
+      "id": "send-self",
+      "type": "native-send",
+      "to": "0x000000000000000000000000000000000000dEaD",
+      "value": "usd:0.01"
+    }
+  ],
+  "options": {
+    "simulate": true,
+    "stopOnError": false
+  }
+}

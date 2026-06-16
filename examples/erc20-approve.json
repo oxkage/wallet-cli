@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "name": "example-erc20-approve",
+  "chain": "Base",
+  "defaultFromIndex": 0,
+  "operations": [
+    {
+      "id": "approve-router",
+      "type": "erc20-approve",
+      "token": "USDC",
+      "spender": "0x0000000000000000000000000000000000CaFee2",
+      "amount": "unlimited"
+    }
+  ]
+}

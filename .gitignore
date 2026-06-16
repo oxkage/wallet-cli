@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.burnerctl/
+.env
+.env.local
+secrets/
+*.private.json
+wallets.json
+burner_wallets.json

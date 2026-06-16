@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "name": "example-contract-call",
+  "chain": "Base",
+  "defaultFromIndex": 0,
+  "operations": [
+    {
+      "id": "transfer-via-call",
+      "type": "contract-call",
+      "to": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+      "abi": "erc20",
+      "fn": "transfer(address,uint256)",
+      "args": [
+        "0x000000000000000000000000000000000000dEaD",
+        "1000000"
+      ],
+      "value": "0"
+    }
+  ]
+}
