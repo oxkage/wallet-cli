@@ -82,7 +82,7 @@ npm run check:tests      # tsc --noEmit on src + tests
 npm run test:smoke       # dist sanity (chains list + validate)
 ```
 
-Test count target: **162+**. If you add a new module, add a test file in
+Test count target: **173+**. If you add a new module, add a test file in
 `tests/lib/<mirror-of-src-path>/<module>.test.ts`.
 
 ## Code conventions

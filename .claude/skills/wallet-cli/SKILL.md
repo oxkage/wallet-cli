@@ -134,6 +134,19 @@ node dist/index.js validate nft-dist.json && node dist/index.js run nft-dist.jso
 Both default to `safeTransferFrom` (`--unsafe` for plain `transferFrom`). Each op
 re-checks ownership on-chain at run time, so stale enumeration can't push a bad tx.
 
+**Batch mint/claim from a wallet index range (same call, fixed args)**
+```bash
+# Mint(0,1) from idx 1..99. fn signature + args validated once up front.
+ABI='[{"name":"mint","type":"function","stateMutability":"nonpayable","inputs":[{"type":"uint256"},{"type":"uint256"}],"outputs":[]}]'
+node dist/index.js scaffold call-range --chain base --to 0xContract \
+  --abi "$ABI" --fn "mint(uint256,uint256)" --args "0,1" \
+  --from-idx 1 --to-idx 99 --out mint.json
+node dist/index.js validate mint.json && node dist/index.js run mint.json --yes
+# Paid mint: add --value wei:N (per call). Built-in ABI: --abi erc721. No args: --args ""
+```
+> Each wallet needs gas. FUND THE RANGE FIRST, then mint:
+> `scaffold distribute --from 0xFunder --to-idx 1 --to-idx-end 99 --token native --per 0.002 --split fixed`
+
 **Inspect**
 ```bash
 node dist/index.js balance --chain base --from 0 --to 10

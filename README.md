@@ -271,6 +271,39 @@ Both emit `erc721-transfer` ops (`safeTransferFrom` by default; `--unsafe` for
 plain `transferFrom`). Each op re-verifies ownership on-chain at run time, so a
 stale enumeration can't push a doomed transfer.
 
+### Batch contract calls (mint / claim / register)
+
+`call-range` broadcasts the **same** contract call from every wallet in an index
+range — the canonical pattern for minting or claiming from many burner wallets
+with fixed params. One `contract-call` op per index; the fn signature and args
+are validated **once up front** (encoded with ethers), so a bad ABI/fn/arg fails
+immediately instead of N times at run time.
+
+```bash
+# Mint(0,1) from wallets idx 1..99 on a contract
+ABI='[{"name":"mint","type":"function","stateMutability":"nonpayable","inputs":[{"type":"uint256"},{"type":"uint256"}],"outputs":[]}]'
+node dist/index.js scaffold call-range --chain Base \
+  --to 0xNFTContract --abi "$ABI" \
+  --fn "mint(uint256,uint256)" --args "0,1" \
+  --from-idx 1 --to-idx 99 --out mint.json
+node dist/index.js run mint.json --yes
+
+# Paid mint: add per-call native value
+#   --value wei:1000000000000000   (0.001 ETH each)
+# Free claim() with a built-in ABI alias and no args:
+node dist/index.js scaffold call-range --chain Base \
+  --to 0xDrop --abi erc721 --fn "claim()" --args "" --from-idx 1 --to-idx 50
+```
+
+> [!IMPORTANT]
+> Each wallet in the range needs native balance for gas (plus the mint price if
+> paid). **Fund the range first**, then mint:
+> ```bash
+> node dist/index.js scaffold distribute --chain Base --from 0xFunder \
+>   --to-idx 1 --to-idx-end 99 --token native --per 0.002 --split fixed --out fund.json
+> node dist/index.js run fund.json --yes   # gas in → then run the call-range plan
+> ```
+
 ### Inspect and manage
 
 ```bash
@@ -292,6 +325,7 @@ Ready to run in [`examples/`](./examples/):
 - [`erc721-approve.json`](./examples/erc721-approve.json) — collection-wide `setApprovalForAll`
 - [`sweep-nft.json`](./examples/sweep-nft.json) — sweep NFTs from many wallets to one vault
 - [`distribute-nft.json`](./examples/distribute-nft.json) — round-robin NFT distribution to recipients
+- [`call-range.json`](./examples/call-range.json) — batch `claim()` from a wallet index range
 
 ## Safety
 
