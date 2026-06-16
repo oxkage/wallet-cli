@@ -19,11 +19,9 @@ export function validateCommand(): Command {
         console.log(chalk.green("Validation ok. SEED_PHRASE is configured and valid. No wallet file configured."));
       } else {
         const data = loadWalletFileFromEnvOrThrow();
-        const solanaCount = data.wallets.solana.length;
         const evmCount = data.wallets.evm.length;
-        const total = solanaCount + evmCount;
+        const total = evmCount;
         const errors: string[] = [];
-        if (solanaCount !== data.metadata.solana_count) errors.push(`solana_count mismatch metadata=${data.metadata.solana_count} actual=${solanaCount}`);
         if (evmCount !== data.metadata.evm_count) errors.push(`evm_count mismatch metadata=${data.metadata.evm_count} actual=${evmCount}`);
         if (total !== data.metadata.total_wallets) errors.push(`total_wallets mismatch metadata=${data.metadata.total_wallets} actual=${total}`);
 
@@ -33,7 +31,7 @@ export function validateCommand(): Command {
           process.exitCode = 1;
           return;
         }
-        console.log(chalk.green(`Validation ok. seed=ok total=${total} evm=${evmCount} solana=${solanaCount}`));
+        console.log(chalk.green(`Validation ok. seed=ok total=${total} evm=${evmCount}`));
       }
 
       // If a plan was provided, also validate it

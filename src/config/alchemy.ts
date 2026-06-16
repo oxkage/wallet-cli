@@ -27,7 +27,6 @@ export const ALCHEMY_SLUGS: Record<string, string> = {
   "100": "gnosis-mainnet",
   "2741": "abstract-mainnet",
   "10143": "monad-testnet",
-  "solana-mainnet": "solana-mainnet",
 };
 
 /** Read the Alchemy key from env (trimmed). Empty/unset → null. */

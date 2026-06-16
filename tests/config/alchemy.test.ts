@@ -39,9 +39,10 @@ test("alchemyRpcUrl: null for unsupported chain even with a key", () => {
   assert.equal(alchemyRpcUrl(369), null);
 });
 
-test("alchemyRpcUrl: accepts string chainId (Solana)", () => {
+test("alchemyRpcUrl: unknown string chainId falls back to null", () => {
   process.env.ALCHEMY_API_KEY = "KEY";
-  assert.equal(alchemyRpcUrl("solana-mainnet"), "https://solana-mainnet.g.alchemy.com/v2/KEY");
+  // String chainIds are still supported by the lookup; unmapped ones → null.
+  assert.equal(alchemyRpcUrl("not-a-real-network"), null);
 });
 
 test("ALCHEMY_SLUGS: every slug is lowercase and mainnet/testnet-suffixed", () => {

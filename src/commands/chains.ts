@@ -12,11 +12,6 @@ async function testEvmRpc(rpcUrl: string, timeoutMs: number): Promise<string> {
   return `ok block=${parseInt(String(blockHex), 16)}`;
 }
 
-async function testSolanaRpc(rpcUrl: string, timeoutMs: number): Promise<string> {
-  const slot = await postJsonRpc(rpcUrl, "getSlot", [{ commitment: "confirmed" }], timeoutMs);
-  return `ok slot=${slot}`;
-}
-
 export function chainsCommand(): Command {
   const cmd = new Command("chains").description("Manage chain registry and RPC checks");
 
@@ -66,7 +61,7 @@ export function chainsCommand(): Command {
       for (const c of selected) {
         if (!c) continue;
         try {
-          const status = c.type === "evm" ? await testEvmRpc(c.rpcUrl, timeoutMs) : await testSolanaRpc(c.rpcUrl, timeoutMs);
+          const status = await testEvmRpc(c.rpcUrl, timeoutMs);
           table.push([c.name, chalk.green(status)]);
         } catch (error) {
           table.push([c.name, chalk.red(`fail ${(error as Error).message}`)]);

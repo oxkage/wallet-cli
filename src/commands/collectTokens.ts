@@ -28,9 +28,6 @@ function findChainOrThrow(input: string) {
   if (!chain) {
     throw new Error(`Chain not found: ${input}`);
   }
-  if (chain.type !== "evm") {
-    throw new Error(`Chain ${chain.name} is not EVM (Solana tokens are Phase 6)`);
-  }
   return chain;
 }
 

@@ -4,13 +4,6 @@ import { ethers } from "ethers";
 import { z } from "zod";
 import { PATHS } from "./paths";
 
-const solanaWalletSchema = z.object({
-  index: z.number().int().nonnegative(),
-  path: z.string(),
-  publicKey: z.string(),
-  secretKey: z.array(z.number()).optional()
-});
-
 const evmWalletSchema = z.object({
   index: z.number().int().nonnegative(),
   path: z.string(),
@@ -22,12 +15,10 @@ export const burnerWalletSchema = z.object({
   mnemonic: z.string(),
   metadata: z.object({
     total_wallets: z.number().int().nonnegative(),
-    solana_count: z.number().int().nonnegative(),
     evm_count: z.number().int().nonnegative(),
     updated_at: z.string()
   }),
   wallets: z.object({
-    solana: z.array(solanaWalletSchema),
     evm: z.array(evmWalletSchema)
   })
 });

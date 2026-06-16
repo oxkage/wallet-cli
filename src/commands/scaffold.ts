@@ -38,9 +38,6 @@ function findChainOrThrow(input: string) {
   if (!chain) {
     throw new Error(`Chain not found: ${input}. Run 'wallet-cli chains list' to see available chains.`);
   }
-  if (chain.type !== "evm") {
-    throw new Error(`Chain ${chain.name} is not EVM (Solana plans are not scaffolded yet)`);
-  }
   return chain;
 }
 

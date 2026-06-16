@@ -1,7 +1,7 @@
 ---
 name: wallet-cli
 description: >
-  Plan-driven CLI for burner-wallet operations across EVM chains and Solana —
+  Plan-driven CLI for burner-wallet operations across EVM chains —
   send native/ERC-20 tokens, transfer and approve ERC-721 NFTs, approve
   spenders, call contracts, send raw transactions, batch-scan balances, and
   split/airdrop funds across many wallets. A transaction is data (a JSON plan),
@@ -15,7 +15,7 @@ description: >
 
 # Using wallet-cli
 
-A plan-driven CLI for burner-wallet operations on EVM chains and Solana. Every
+A plan-driven CLI for burner-wallet operations on EVM chains. Every
 action funnels through ONE path:
 
 ```

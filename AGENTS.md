@@ -121,7 +121,7 @@ Test count target: **189+**. If you add a new module, add a test file in
 
 ### Add a new chain
 
-1. Add an entry to `src/config/chains.ts` (chainId, `rpcUrl` = public fallback, type: "evm"|"solana")
+1. Add an entry to `src/config/chains.ts` (chainId, `rpcUrl` = public fallback, type: "evm")
 2. If Alchemy serves it, add `chainId → slug` to `ALCHEMY_SLUGS` in `src/config/alchemy.ts`
    so an `ALCHEMY_API_KEY` user gets the premium endpoint automatically
 3. Add token seeds to `src/lib/tokens.ts` if you have them

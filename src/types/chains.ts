@@ -1,7 +1,7 @@
 export type Chain = {
   name: string;
   chainId: number | string;
-  type: "evm" | "solana";
+  type: "evm";
   rpcUrl: string;
   explorer?: string;
   enabled: boolean;

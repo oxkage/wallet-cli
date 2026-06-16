@@ -4,23 +4,19 @@ import { backupFileIfExists, ensureDir } from "./backup";
 import { PATHS } from "./paths";
 import { deriveEvmWalletRange } from "./wallets";
 
-export type WalletChain = "evm" | "solana";
+export type WalletChain = "evm";
 
 const walletIndexEntrySchema = z
   .object({
-    chain: z.enum(["evm", "solana"]),
+    chain: z.literal("evm"),
     index: z.number().int().nonnegative(),
     path: z.string(),
     label: z.string(),
-    address: z.string().optional(),
-    publicKey: z.string().optional()
+    address: z.string().optional()
   })
   .superRefine((entry, ctx) => {
     if (entry.chain === "evm" && !entry.address) {
       ctx.addIssue({ code: z.ZodIssueCode.custom, message: "evm entry missing address" });
-    }
-    if (entry.chain === "solana" && !entry.publicKey) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "solana entry missing publicKey" });
     }
   });
 
@@ -38,11 +34,7 @@ const walletIndexMapSchema = z.object({
 export type WalletIndexEntry = z.infer<typeof walletIndexEntrySchema>;
 export type WalletIndexMap = z.infer<typeof walletIndexMapSchema>;
 
-export function saveWalletIndexMap(chain: "evm" | "solana" | "both" = "both", from = 0, to = 199): WalletIndexMap {
-  if (chain === "solana" || chain === "both") {
-    throw new Error("Solana indexing is not available in SEED_PHRASE-only mode. Use --chain evm.");
-  }
-
+export function saveWalletIndexMap(from = 0, to = 199): WalletIndexMap {
   const entries: Record<string, WalletIndexEntry> = {};
   for (const w of deriveEvmWalletRange(from, to)) {
     entries[w.address.toLowerCase()] = {
@@ -79,20 +71,16 @@ export function loadWalletIndexMap(): WalletIndexMap | null {
   return walletIndexMapSchema.parse(parsed);
 }
 
-export function resolveWalletAddress(addrOrPubkey: string, chain: "evm" | "solana" | "both" = "both"): WalletIndexEntry | null {
+export function resolveWalletAddress(addrOrPubkey: string): WalletIndexEntry | null {
   const key = addrOrPubkey.trim().toLowerCase();
-  if (!key) throw new Error("Address/publicKey is empty");
-
-  if (chain === "solana" || chain === "both") {
-    throw new Error("Address resolution currently supports EVM only in SEED_PHRASE mode. Use --chain evm.");
-  }
+  if (!key) throw new Error("Address is empty");
 
   let indexMap = loadWalletIndexMap();
   if (!indexMap) {
-    indexMap = saveWalletIndexMap("evm");
+    indexMap = saveWalletIndexMap();
   }
 
   const entry = indexMap.entries[key] ?? null;
   if (!entry) return null;
-  return entry.chain === chain ? entry : null;
+  return entry;
 }

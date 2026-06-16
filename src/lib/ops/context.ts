@@ -35,7 +35,6 @@ export async function buildContext(plan: Plan, cliDryRun: boolean): Promise<OpCo
   const enabledChains = getChainsWithOverrides().filter((c) => c.enabled);
   const chain = findChain(plan.chain, enabledChains);
   if (!chain) throw new Error(`Chain not found or disabled: ${plan.chain}`);
-  if (chain.type !== "evm") throw new Error(`Chain ${chain.name} is not EVM (Solana is Phase 6)`);
 
   const provider = new ethers.JsonRpcProvider(chain.rpcUrl);
   const fees = await resolveFees(provider, "normal");

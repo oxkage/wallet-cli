@@ -4,7 +4,7 @@ import { z } from "zod";
 import { deriveEvmWalletRange } from "../lib/wallets";
 
 const schema = z.object({
-  chain: z.enum(["evm", "solana"]),
+  chain: z.literal("evm").default("evm"),
   from: z.coerce.number().int().min(0),
   to: z.coerce.number().int().min(0),
   format: z.enum(["json", "table"]).default("json")
@@ -12,18 +12,14 @@ const schema = z.object({
 
 export function exportCommand(): Command {
   return new Command("export")
-    .description("Export public wallet fields only")
-    .requiredOption("--chain <evm|solana>")
+    .description("Export public wallet fields only (EVM)")
     .requiredOption("--from <index>")
     .requiredOption("--to <index>")
+    .option("--chain <evm>", "Wallet chain (EVM only)", "evm")
     .option("--format <json|table>", "Output format", "json")
     .action((opts) => {
       const parsed = schema.parse(opts);
       if (parsed.to < parsed.from) throw new Error("--to must be >= --from");
-
-      if (parsed.chain === "solana") {
-        throw new Error("Solana export is not available in SEED_PHRASE-only mode. Configure BURNER_WALLETS_FILE to enable Solana exports.");
-      }
 
       const wallets = deriveEvmWalletRange(parsed.from, parsed.to).map((w) => ({
         index: w.index,

@@ -25,6 +25,5 @@ export const DEFAULT_CHAINS: Chain[] = [
   { name: "Monad", chainId: 10143, type: "evm", rpcUrl: "https://testnet-rpc.monad.xyz", explorer: "https://testnet.monadexplorer.com", enabled: true },
   { name: "PulseChain", chainId: 369, type: "evm", rpcUrl: "https://rpc.pulsechain.com", explorer: "https://scan.pulsechain.com", enabled: true },
   { name: "Abstract", chainId: 2741, type: "evm", rpcUrl: "https://api.mainnet.abs.xyz", explorer: "https://abscan.org", enabled: true },
-  { name: "Harmony", chainId: 1666600000, type: "evm", rpcUrl: "https://api.harmony.one", explorer: "https://explorer.harmony.one", enabled: true },
-  { name: "Solana", chainId: "solana-mainnet", type: "solana", rpcUrl: "https://api.mainnet-beta.solana.com", explorer: "https://solscan.io", enabled: true }
+  { name: "Harmony", chainId: 1666600000, type: "evm", rpcUrl: "https://api.harmony.one", explorer: "https://explorer.harmony.one", enabled: true }
 ];

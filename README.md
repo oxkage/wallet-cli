@@ -2,7 +2,7 @@
 
 # wallet-cli
 
-**A plan-driven CLI for burner-wallet operations across EVM chains and Solana.**
+**A plan-driven CLI for burner-wallet operations across EVM chains.**
 
 [![version](https://img.shields.io/badge/version-0.2.0-blue)](package.json)
 [![node](https://img.shields.io/badge/node-%3E%3D18-green)](package.json)
@@ -98,7 +98,7 @@ Only two variables matter. Everything else is optional.
 | --- | --- | --- |
 | `SEED_PHRASE` | **yes** | BIP-39 mnemonic (12/24 words). All EVM wallets derive from it. |
 | `ALCHEMY_API_KEY` | recommended | One key → RPC for every supported chain. The CLI builds each chain's Alchemy endpoint from this key. Unsupported chains fall back to a bundled public RPC. |
-| `BURNER_WALLETS_FILE` | optional | Path to a JSON wallet source. Needed for Solana-only flows. |
+| `BURNER_WALLETS_FILE` | optional | Path to a JSON wallet source, as an alternative to deriving from `SEED_PHRASE`. |
 | `LOG_LEVEL` | optional | `info` / `warn` / `error` / `debug` |
 
 > [!NOTE]
@@ -392,9 +392,7 @@ npm run test:smoke       # built-dist sanity check
 >
 > **RPC errors or rate limits** — check `ALCHEMY_API_KEY`, then `wallet-cli chains test-rpc --chain <name>`. Chains Alchemy doesn't serve use a public RPC and may be slower.
 >
-> **Address cannot be resolved** — widen the index range: `wallet-cli wallet reindex --chain evm --from 0 --to 999`.
->
-> **Solana commands fail** — set `BURNER_WALLETS_FILE` to a valid wallet source.
+> **Address cannot be resolved** — widen the index range: `wallet-cli wallet reindex --from 0 --to 999`.
 >
 > **`Token not found on chain`** — register it: `wallet-cli collect-tokens add --chain X --address 0x.. --symbol .. --decimals N`.
 >
