@@ -3,6 +3,13 @@ import Table from "cli-table3";
 import chalk from "chalk";
 import { queryTx, tailTx, type TxEntry, type TxStatus } from "../lib/txHistory";
 import { safeLog } from "../lib/redact";
+import {
+  gasFeeWei,
+  weiToNativeString,
+  gasFeeUsd,
+  nativeSymbolForChain,
+  fetchNativePrices,
+} from "../lib/gasCost";
 
 const VALID_STATUSES: TxStatus[] = ["submitted", "success", "reverted", "failed", "dry-run"];
 
@@ -17,8 +24,10 @@ export function historyCommand(): Command {
     .option("--since <isoDate>", "Entries on or after this ISO date (inclusive)")
     .option("--until <isoDate>", "Entries on or before this ISO date (inclusive)")
     .option("--limit <N>", "Max entries to return (default 20)", (v) => Number(v), 20)
+    .option("--gas", "Show per-tx gas cost in native units (gasUsed × effectiveGasPrice)", false)
+    .option("--usd", "Also show gas cost in USD at current spot price (implies --gas). ETH-gas chains supported; others show native only.", false)
     .option("--format <format>", "Output format: json | table (default table)", "table")
-    .action((opts: {
+    .action(async (opts: {
       chain?: string;
       plan?: string;
       opId?: string;
@@ -27,6 +36,8 @@ export function historyCommand(): Command {
       since?: string;
       until?: string;
       limit: number;
+      gas: boolean;
+      usd: boolean;
       format: string;
     }) => {
       if (opts.status && !VALID_STATUSES.includes(opts.status as TxStatus)) {
@@ -56,25 +67,56 @@ export function historyCommand(): Command {
         return;
       }
 
+      const showGas = opts.gas || opts.usd;
+
       if (opts.format === "json") {
-        safeLog({ count: rows.length, entries: rows });
+        if (showGas) {
+          // Enrich entries with computed gas cost (native + optional USD).
+          const symbols = rows.map((r) => nativeSymbolForChain(r.chainId));
+          const prices = opts.usd ? await fetchNativePrices(symbols) : {};
+          const entries = rows.map((r) => {
+            const feeWei = gasFeeWei(r.gasUsed, r.effectiveGasPrice);
+            const sym = nativeSymbolForChain(r.chainId);
+            const native = feeWei !== null ? weiToNativeString(feeWei) : null;
+            const usd =
+              opts.usd && feeWei !== null && prices[sym] !== undefined
+                ? Number(gasFeeUsd(feeWei, prices[sym]).toFixed(6))
+                : null;
+            return { ...r, gasFeeWei: feeWei?.toString() ?? null, gasNative: native, gasSymbol: sym, gasUsd: usd };
+          });
+          safeLog({ count: rows.length, entries });
+        } else {
+          safeLog({ count: rows.length, entries: rows });
+        }
         return;
       }
 
+      // Pre-fetch USD prices once for all rows (deduped) before rendering.
+      const prices = opts.usd
+        ? await fetchNativePrices(rows.map((r) => nativeSymbolForChain(r.chainId)))
+        : {};
+
+      const head = ["ts", "plan/op", "chain", "type", "from", "to/token", "amount", "status", "hash"];
+      const colWidths = [22, 28, 10, 14, 14, 30, 12, 10, 14];
+      if (showGas) {
+        head.push("gas");
+        colWidths.push(opts.usd ? 22 : 14);
+      }
       const table = new Table({
-        head: ["ts", "plan/op", "chain", "type", "from", "to/token", "amount", "status", "hash"].map(
-          (h) => chalk.bold(h)
-        ),
-        colWidths: [22, 28, 10, 14, 14, 30, 12, 10, 14],
+        head: head.map((h) => chalk.bold(h)),
+        colWidths,
         wordWrap: true,
       });
+
+      let totalUsd = 0;
+      const totalNativeBySym: Record<string, bigint> = {};
       for (const r of rows) {
         const planCol = r.plan ? `${r.plan}${r.opId ? "/" + r.opId : ""}` : chalk.dim("(direct)");
         const toCol = r.token ? `${r.token}:${shortAddr(r.to)}` : shortAddr(r.to);
         const amountCol = formatAmountCol(r);
         const hashCol = r.hash ? r.hash.slice(0, 10) + "..." : chalk.dim("-");
         const statusCol = colorStatus(r.status);
-        table.push([
+        const cells = [
           r.ts.replace("T", " ").replace("Z", ""),
           planCol,
           r.chain,
@@ -84,10 +126,41 @@ export function historyCommand(): Command {
           amountCol,
           statusCol,
           hashCol,
-        ]);
+        ];
+        if (showGas) {
+          const feeWei = gasFeeWei(r.gasUsed, r.effectiveGasPrice);
+          const sym = nativeSymbolForChain(r.chainId);
+          if (feeWei === null) {
+            cells.push(chalk.dim("-"));
+          } else {
+            totalNativeBySym[sym] = (totalNativeBySym[sym] ?? 0n) + feeWei;
+            let cell = `${weiToNativeString(feeWei)} ${sym}`;
+            if (opts.usd && prices[sym] !== undefined) {
+              const usd = gasFeeUsd(feeWei, prices[sym]);
+              totalUsd += usd;
+              cell += chalk.dim(`\n$${usd.toFixed(4)}`);
+            }
+            cells.push(cell);
+          }
+        }
+        table.push(cells);
       }
       console.log(table.toString());
       console.log(chalk.dim(`\n${rows.length} entr${rows.length === 1 ? "y" : "ies"} (limit ${opts.limit})`));
+
+      if (showGas) {
+        const totalParts = Object.entries(totalNativeBySym).map(
+          ([sym, wei]) => `${weiToNativeString(wei)} ${sym}`
+        );
+        if (totalParts.length > 0) {
+          let line = chalk.bold(`Total gas: ${totalParts.join(" + ")}`);
+          if (opts.usd && totalUsd > 0) line += chalk.dim(`  (≈ $${totalUsd.toFixed(4)})`);
+          console.log(line);
+        }
+        if (opts.usd && Object.keys(prices).length === 0) {
+          console.log(chalk.dim("(USD unavailable — price fetch failed or unsupported native token)"));
+        }
+      }
     });
 }
 
