@@ -12,6 +12,8 @@ import "../../../../src/lib/ops/builtin/nativeSend";
 import "../../../../src/lib/ops/builtin/rawTx";
 import "../../../../src/lib/ops/builtin/erc20Transfer";
 import "../../../../src/lib/ops/builtin/erc20Approve";
+import "../../../../src/lib/ops/builtin/erc721Transfer";
+import "../../../../src/lib/ops/builtin/erc721Approve";
 import "../../../../src/lib/ops/builtin/contractCall";
 
 // --- Calldata correctness using the bundled ABI directly ---
@@ -80,12 +82,14 @@ test("erc20: amount parsing 'unlimited' for 6-decimal token → MaxUint256", asy
 
 // --- Registry registration ---
 
-test("ops: all 5 builtin ops are registered", () => {
+test("ops: all 7 builtin ops are registered", () => {
   const types = listOps().map((o) => o.type).sort();
   assert.deepEqual(types, [
     "contract-call",
     "erc20-approve",
     "erc20-transfer",
+    "erc721-approve",
+    "erc721-transfer",
     "native-send",
     "raw-tx",
   ]);

@@ -8,6 +8,8 @@ import "./builtin/nativeSend";
 import "./builtin/rawTx";
 import "./builtin/erc20Transfer";
 import "./builtin/erc20Approve";
+import "./builtin/erc721Transfer";
+import "./builtin/erc721Approve";
 import "./builtin/contractCall";
 
 export type OpResult = {
