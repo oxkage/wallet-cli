@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "name": "example-sweep-nft",
+  "chain": "Base",
+  "operations": [
+    {
+      "id": "sweepnft-0",
+      "type": "erc721-transfer",
+      "fromIndex": 0,
+      "contract": "0x00000000000000000000000000000000c0ffee00",
+      "tokenId": "1234",
+      "to": "0x000000000000000000000000000000000000beef"
+    },
+    {
+      "id": "sweepnft-1",
+      "type": "erc721-transfer",
+      "fromIndex": 3,
+      "contract": "0x00000000000000000000000000000000c0ffee00",
+      "tokenId": "5678",
+      "to": "0x000000000000000000000000000000000000beef"
+    }
+  ]
+}

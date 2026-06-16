@@ -9,6 +9,10 @@ import { generateSweepPlan } from "../lib/scaffold/sweep";
 import { generateMultisendPlan } from "../lib/scaffold/multisend";
 import { generateCollectPlan } from "../lib/scaffold/collect";
 import { generateDistributePlan } from "../lib/scaffold/distribute";
+import { generateSweepNftPlan } from "../lib/scaffold/sweepNft";
+import { generateDistributeNftPlan } from "../lib/scaffold/distributeNft";
+import { enumerateOwnership } from "../lib/nft/ownership";
+import { deriveEvmWalletRange } from "../lib/wallets";
 import { computeDistribution, type SplitStrategy } from "../lib/scaffold/distributeMath";
 import { scanBalances } from "../lib/scan/scan";
 import { findToken } from "../lib/tokens";
@@ -361,7 +365,146 @@ export function scaffoldCommand(): Command {
       }
     });
 
+  // --- sweep-nft ---
+  cmd
+    .command("sweep-nft")
+    .description("Generate an NFT sweep plan: transfer every owned tokenId of a collection, from each wallet in [fromIdx, toIdx], to one destination. Ownership is enumerated via the Alchemy NFT API (or ERC721Enumerable fallback).")
+    .requiredOption("--chain <nameOrChainId>", "Chain name or chainId")
+    .requiredOption("--contract <address>", "NFT collection 0x address")
+    .requiredOption("--from-idx <N>", "First wallet index (inclusive)", (v) => indexArg.parse(v))
+    .requiredOption("--to-idx <N>", "Last wallet index (inclusive)", (v) => indexArg.parse(v))
+    .requiredOption("--to <address>", "Destination 0x address")
+    .option("--strategy <alchemy|enumerable|auto>", "Ownership lookup strategy", "auto")
+    .option("--unsafe", "Use plain transferFrom instead of safeTransferFrom", false)
+    .option("--name <name>", "Plan name", "sweep-nft")
+    .option("--out <file>", "Output plan JSON file (default: stdout)")
+    .action(async (opts: {
+      chain: string;
+      contract: string;
+      fromIdx: number;
+      toIdx: number;
+      to: string;
+      strategy: string;
+      unsafe?: boolean;
+      name: string;
+      out?: string;
+    }) => {
+      const chain = findChainOrThrow(chainArg.parse(opts.chain));
+      const contract = addressArg.parse(opts.contract);
+      const to = addressArg.parse(opts.to);
+      if (!["alchemy", "enumerable", "auto"].includes(opts.strategy)) {
+        throw new Error(`--strategy must be alchemy|enumerable|auto, got: ${opts.strategy}`);
+      }
+      const wallets = deriveEvmWalletRange(opts.fromIdx, opts.toIdx).map((w) => ({
+        index: w.index,
+        address: w.address,
+      }));
+
+      const ownership = await enumerateOwnership({
+        chainId: chain.chainId as number,
+        contract,
+        wallets,
+        strategy: opts.strategy as "alchemy" | "enumerable" | "auto",
+        rpcUrl: chain.rpcUrl,
+      });
+
+      const totalTokens = ownership.reduce((n, r) => n + r.tokenIds.length, 0);
+      const plan = generateSweepNftPlan({
+        chain: chain.name,
+        contract,
+        to,
+        ownership,
+        unsafe: opts.unsafe,
+        name: opts.name,
+      });
+      const { written } = writePlan(plan, opts.out);
+      if (opts.out) {
+        console.error(chalk.green(`✔ Wrote NFT sweep plan: ${plan.operations.length} transfers (${totalTokens} tokens across ${ownership.filter((r) => r.tokenIds.length > 0).length} wallets) to ${written}`));
+        console.error(summarizeNftPlan(plan));
+      }
+    });
+
+  // --- distribute-nft ---
+  cmd
+    .command("distribute-nft")
+    .description("Generate an NFT distribute plan: spread one source wallet's owned tokenIds of a collection across many recipients (round-robin). Ownership enumerated via the Alchemy NFT API (or ERC721Enumerable fallback).")
+    .requiredOption("--chain <nameOrChainId>", "Chain name or chainId")
+    .requiredOption("--from <addrOrIdx>", "Source 0x... address or wallet index holding the NFTs")
+    .requiredOption("--contract <address>", "NFT collection 0x address")
+    .requiredOption("--recipients <list>", "Comma-separated recipient 0x addresses")
+    .option("--token-ids <list>", "Comma-separated tokenIds to distribute (default: all the source owns)")
+    .option("--strategy <alchemy|enumerable|auto>", "Ownership lookup strategy (when --token-ids omitted)", "auto")
+    .option("--unsafe", "Use plain transferFrom instead of safeTransferFrom", false)
+    .option("--name <name>", "Plan name", "distribute-nft")
+    .option("--out <file>", "Output plan JSON file (default: stdout)")
+    .action(async (opts: {
+      chain: string;
+      from: string;
+      contract: string;
+      recipients: string;
+      tokenIds?: string;
+      strategy: string;
+      unsafe?: boolean;
+      name: string;
+      out?: string;
+    }) => {
+      const chain = findChainOrThrow(chainArg.parse(opts.chain));
+      const contract = addressArg.parse(opts.contract);
+      const from = parseFromArg(opts.from);
+      const recipients = opts.recipients.split(",").map((s) => s.trim()).filter((s) => s.length > 0);
+      if (recipients.length === 0) throw new Error("--recipients must list at least one 0x address");
+
+      // tokenIds: explicit list, or enumerate the source's holdings.
+      let tokenIds: string[];
+      if (opts.tokenIds && opts.tokenIds.trim().length > 0) {
+        tokenIds = opts.tokenIds.split(",").map((s) => s.trim()).filter((s) => s.length > 0);
+      } else {
+        const sourceAddress =
+          typeof from === "string" ? from : deriveEvmWalletRange(from, from)[0].address;
+        if (!["alchemy", "enumerable", "auto"].includes(opts.strategy)) {
+          throw new Error(`--strategy must be alchemy|enumerable|auto, got: ${opts.strategy}`);
+        }
+        const ownership = await enumerateOwnership({
+          chainId: chain.chainId as number,
+          contract,
+          wallets: [{ index: typeof from === "number" ? from : -1, address: sourceAddress }],
+          strategy: opts.strategy as "alchemy" | "enumerable" | "auto",
+          rpcUrl: chain.rpcUrl,
+        });
+        tokenIds = ownership[0]?.tokenIds ?? [];
+        if (tokenIds.length === 0) {
+          throw new Error(
+            `Source ${sourceAddress} owns no tokens of ${contract} on ${chain.name}. ` +
+              `Nothing to distribute. (Pass --token-ids to override.)`
+          );
+        }
+      }
+
+      const plan = generateDistributeNftPlan({
+        chain: chain.name,
+        from,
+        contract,
+        tokenIds,
+        recipients,
+        unsafe: opts.unsafe,
+        name: opts.name,
+      });
+      const { written } = writePlan(plan, opts.out);
+      if (opts.out) {
+        console.error(chalk.green(`✔ Wrote NFT distribute plan: ${plan.operations.length} transfers (${tokenIds.length} tokens → ${recipients.length} recipients) to ${written}`));
+        console.error(summarizeNftPlan(plan));
+      }
+    });
+
   return cmd;
+}
+
+/** NFT plan summary (counts erc721-transfer ops). */
+function summarizeNftPlan(plan: { chain: string; operations: Array<{ type: string }> }) {
+  const table = new Table({ head: ["Chain", "Total ops", "erc721-transfer"] });
+  const nftCount = plan.operations.filter((o) => o.type === "erc721-transfer").length;
+  table.push([plan.chain, String(plan.operations.length), String(nftCount)]);
+  return table.toString();
 }
 
 // --- distribute helpers ---
