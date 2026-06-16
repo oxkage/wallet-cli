@@ -11,6 +11,7 @@ import { generateCollectPlan } from "../lib/scaffold/collect";
 import { generateDistributePlan } from "../lib/scaffold/distribute";
 import { generateSweepNftPlan } from "../lib/scaffold/sweepNft";
 import { generateDistributeNftPlan } from "../lib/scaffold/distributeNft";
+import { generateCallRangePlan } from "../lib/scaffold/callRange";
 import { enumerateOwnership } from "../lib/nft/ownership";
 import { deriveEvmWalletRange } from "../lib/wallets";
 import { computeDistribution, type SplitStrategy } from "../lib/scaffold/distributeMath";
@@ -496,10 +497,69 @@ export function scaffoldCommand(): Command {
       }
     });
 
+  // --- call-range ---
+  cmd
+    .command("call-range")
+    .description("Generate a plan that broadcasts the SAME contract call from every wallet in [fromIdx, toIdx]. Canonical use: batch mint/claim/register with fixed args (e.g. mint(0,1) from idx 1..99). Fund the range first with 'scaffold distribute'.")
+    .requiredOption("--chain <nameOrChainId>", "Chain name or chainId")
+    .requiredOption("--to <address>", "Contract 0x address to call")
+    .requiredOption("--fn <signature>", "Full function signature, e.g. \"mint(uint256,uint256)\"")
+    .requiredOption("--from-idx <N>", "First wallet index (inclusive)", (v) => indexArg.parse(v))
+    .requiredOption("--to-idx <N>", "Last wallet index (inclusive)", (v) => indexArg.parse(v))
+    .option("--abi <aliasOrPathOrJson>", "ABI alias (erc20/erc721/permit2), file path, or inline JSON", "erc721")
+    .option("--args <list>", "Comma-separated fixed args applied to EVERY call (e.g. '0,1'). Use '' for no args.", "")
+    .option("--value <amount>", "Per-call native value: '0' or 'wei:N' (for paid mints)", "0")
+    .option("--skip <list>", "Comma-separated wallet indices to skip", (v: string) => v.split(",").map((s) => Number(s.trim())).filter((n) => Number.isFinite(n)))
+    .option("--name <name>", "Plan name", "call-range")
+    .option("--out <file>", "Output plan JSON file (default: stdout)")
+    .action((opts: {
+      chain: string;
+      to: string;
+      fn: string;
+      fromIdx: number;
+      toIdx: number;
+      abi: string;
+      args: string;
+      value: string;
+      skip?: number[];
+      name: string;
+      out?: string;
+    }) => {
+      const chain = findChainOrThrow(chainArg.parse(opts.chain));
+      const to = addressArg.parse(opts.to);
+      const args = opts.args.trim().length === 0
+        ? []
+        : opts.args.split(",").map((s) => s.trim());
+
+      const plan = generateCallRangePlan({
+        chain: chain.name,
+        to,
+        abi: opts.abi,
+        fn: opts.fn,
+        args,
+        fromIdx: opts.fromIdx,
+        toIdx: opts.toIdx,
+        value: opts.value,
+        skip: opts.skip,
+        name: opts.name,
+      });
+      const { written } = writePlan(plan, opts.out);
+      if (opts.out) {
+        console.error(chalk.green(`✔ Wrote call-range plan: ${plan.operations.length} calls of ${opts.fn} from idx ${opts.fromIdx}..${opts.toIdx} to ${written}`));
+        console.error(summarizeCallRangePlan(plan));
+      }
+    });
+
   return cmd;
 }
 
-/** NFT plan summary (counts erc721-transfer ops). */
+/** call-range summary (counts contract-call ops). */
+function summarizeCallRangePlan(plan: { chain: string; operations: Array<{ type: string }> }) {
+  const table = new Table({ head: ["Chain", "Total ops", "contract-call"] });
+  const callCount = plan.operations.filter((o) => o.type === "contract-call").length;
+  table.push([plan.chain, String(plan.operations.length), String(callCount)]);
+  return table.toString();
+}
 function summarizeNftPlan(plan: { chain: string; operations: Array<{ type: string }> }) {
   const table = new Table({ head: ["Chain", "Total ops", "erc721-transfer"] });
   const nftCount = plan.operations.filter((o) => o.type === "erc721-transfer").length;

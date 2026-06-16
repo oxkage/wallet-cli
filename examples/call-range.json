@@ -1,0 +1,57 @@
+{
+  "version": 1,
+  "name": "example-call-range",
+  "chain": "Base",
+  "operations": [
+    {
+      "id": "call-1",
+      "type": "contract-call",
+      "fromIndex": 1,
+      "to": "0x00000000000000000000000000000000c0ffee00",
+      "abi": "[{\"name\":\"claim\",\"type\":\"function\",\"stateMutability\":\"nonpayable\",\"inputs\":[],\"outputs\":[]}]",
+      "fn": "claim()",
+      "args": [],
+      "value": "0"
+    },
+    {
+      "id": "call-2",
+      "type": "contract-call",
+      "fromIndex": 2,
+      "to": "0x00000000000000000000000000000000c0ffee00",
+      "abi": "[{\"name\":\"claim\",\"type\":\"function\",\"stateMutability\":\"nonpayable\",\"inputs\":[],\"outputs\":[]}]",
+      "fn": "claim()",
+      "args": [],
+      "value": "0"
+    },
+    {
+      "id": "call-3",
+      "type": "contract-call",
+      "fromIndex": 3,
+      "to": "0x00000000000000000000000000000000c0ffee00",
+      "abi": "[{\"name\":\"claim\",\"type\":\"function\",\"stateMutability\":\"nonpayable\",\"inputs\":[],\"outputs\":[]}]",
+      "fn": "claim()",
+      "args": [],
+      "value": "0"
+    },
+    {
+      "id": "call-4",
+      "type": "contract-call",
+      "fromIndex": 4,
+      "to": "0x00000000000000000000000000000000c0ffee00",
+      "abi": "[{\"name\":\"claim\",\"type\":\"function\",\"stateMutability\":\"nonpayable\",\"inputs\":[],\"outputs\":[]}]",
+      "fn": "claim()",
+      "args": [],
+      "value": "0"
+    },
+    {
+      "id": "call-5",
+      "type": "contract-call",
+      "fromIndex": 5,
+      "to": "0x00000000000000000000000000000000c0ffee00",
+      "abi": "[{\"name\":\"claim\",\"type\":\"function\",\"stateMutability\":\"nonpayable\",\"inputs\":[],\"outputs\":[]}]",
+      "fn": "claim()",
+      "args": [],
+      "value": "0"
+    }
+  ]
+}
