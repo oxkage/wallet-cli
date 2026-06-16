@@ -54,6 +54,9 @@ wei moves.
 
 ## Quick start
 
+> [!TIP]
+> AI agents: see [`docs/INSTALL.md`](docs/INSTALL.md) for a compact, self-contained install + bootstrap guide — everything needed to run the tool without reading the full reference.
+
 ```bash
 git clone https://github.com/oxkage/wallet-cli.git
 cd wallet-cli
