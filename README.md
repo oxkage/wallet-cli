@@ -55,7 +55,7 @@ wei moves.
 ## Quick start
 
 > [!TIP]
-> AI agents: see [`docs/INSTALL.md`](docs/INSTALL.md) for a compact, self-contained install + bootstrap guide — everything needed to run the tool without reading the full reference.
+> **AI agents:** this repo ships an [Agent Skill](.claude/skills/wallet-cli/SKILL.md) (`.claude/skills/wallet-cli/`) that Claude Code auto-discovers — it triggers whenever you work with wallets, plans, or this tool. For a plain install walkthrough see [`docs/INSTALL.md`](docs/INSTALL.md).
 
 ```bash
 git clone https://github.com/oxkage/wallet-cli.git
