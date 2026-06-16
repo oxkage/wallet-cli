@@ -158,7 +158,7 @@ Any `value` / `amount` field accepts:
 | `erc20-approve` | `id, token, spender, amount` | `approve(spender, amount)`. Use `"unlimited"` for `MaxUint256`. |
 | `erc721-transfer` | `id, contract, tokenId, to` | Transfer an NFT. Verifies ownership first. `safeTransferFrom` by default; set `safe:false` for `transferFrom`. |
 | `erc721-approve` | `id, contract, spender` + `tokenId` _or_ `all` | `approve(spender, tokenId)` for one NFT, or `setApprovalForAll(spender, approved)` when `all:true`. `approved:false` revokes. |
-| `contract-call` | `id, to, abi, fn, args` | Encode any call. `abi` = built-in alias (`erc20`/`erc721`/`permit2`), inline JSON, or a file path. |
+| `contract-call` | `id, to, fn, args, abi?` | Encode any call. `fn` as a full signature (e.g. `mint(uint256,uint256)`) needs **no ABI**. `abi` only for bare fn names — built-in alias (`erc20`/`erc721`/`permit2`), inline JSON, or a file path. |
 | `raw-tx` | `id, from, to, data` | Fully manual EIP-1559 tx with raw calldata. |
 
 Discover them live: `wallet-cli ops list` · `wallet-cli ops describe <type>`.
@@ -276,24 +276,43 @@ stale enumeration can't push a doomed transfer.
 `call-range` broadcasts the **same** contract call from every wallet in an index
 range — the canonical pattern for minting or claiming from many burner wallets
 with fixed params. One `contract-call` op per index; the fn signature and args
-are validated **once up front** (encoded with ethers), so a bad ABI/fn/arg fails
+are validated **once up front** (encoded with ethers), so a bad fn/arg fails
 immediately instead of N times at run time.
 
+**No ABI needed.** A full function signature carries the parameter types, which
+is everything ethers needs to encode the call. Just pass `--fn`:
+
 ```bash
-# Mint(0,1) from wallets idx 1..99 on a contract
-ABI='[{"name":"mint","type":"function","stateMutability":"nonpayable","inputs":[{"type":"uint256"},{"type":"uint256"}],"outputs":[]}]'
+# Mint(0,1) from wallets idx 1..99 — no --abi, the signature is enough
 node dist/index.js scaffold call-range --chain Base \
-  --to 0xNFTContract --abi "$ABI" \
+  --to 0xNFTContract \
   --fn "mint(uint256,uint256)" --args "0,1" \
   --from-idx 1 --to-idx 99 --out mint.json
 node dist/index.js run mint.json --yes
-
-# Paid mint: add per-call native value
-#   --value wei:1000000000000000   (0.001 ETH each)
-# Free claim() with a built-in ABI alias and no args:
-node dist/index.js scaffold call-range --chain Base \
-  --to 0xDrop --abi erc721 --fn "claim()" --args "" --from-idx 1 --to-idx 50
 ```
+
+You only need `--abi` when `--fn` is a **bare name** (no parameter list) that has
+to be resolved against an alias/file/JSON — e.g. `--abi erc721 --fn claim`. With
+a full signature, the ABI is redundant (a verified-on-Etherscan contract doesn't
+need its ABI fetched first).
+
+**Parallel broadcast.** By default ops run sequentially (`batchSize 1`). Since
+each index is a different wallet, they're independent — broadcast concurrently
+with `--parallel`, and throttle with `--delay-ms` to stay under RPC rate limits
+(e.g. Alchemy's free tier is ~330 CU/s ≈ a couple of sends per second; paid tiers
+are far higher — tune to your plan):
+
+```bash
+node dist/index.js scaffold call-range --chain Base \
+  --to 0xDrop --fn "claim()" --from-idx 1 --to-idx 50 \
+  --parallel 5 --delay-ms 200 --out claim.json
+
+# Or override at run time without regenerating the plan:
+node dist/index.js run claim.json --yes --parallel 5 --delay-ms 200
+```
+
+The per-address nonce manager keeps each wallet's own txs ordered; `--parallel`
+only fans out *across* wallets, never within one.
 
 > [!IMPORTANT]
 > Each wallet in the range needs native balance for gas (plus the mint price if
@@ -303,6 +322,21 @@ node dist/index.js scaffold call-range --chain Base \
 >   --to-idx 1 --to-idx-end 99 --token native --per 0.002 --split fixed --out fund.json
 > node dist/index.js run fund.json --yes   # gas in → then run the call-range plan
 > ```
+
+### Gas spent (history)
+
+`history` records `gasUsed` and `effectiveGasPrice` per tx. Add `--gas` to see
+the native cost (gasUsed × gasPrice), or `--usd` for the dollar value at current
+spot price, with a total at the bottom:
+
+```bash
+node dist/index.js history --plan mint --gas         # native (ETH/POL/BNB/…) per tx + total
+node dist/index.js history --plan mint --usd          # adds $ value (ETH-gas chains)
+node dist/index.js history --plan mint --usd --format json   # gasFeeWei / gasNative / gasUsd fields
+```
+
+USD is available for ETH-gas chains (all the ETH L2s); other native tokens show
+the native amount only when no price feed is available.
 
 ### Inspect and manage
 

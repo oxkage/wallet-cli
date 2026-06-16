@@ -55,7 +55,7 @@ write a JSON plan; let the CLI execute it deterministically.
 | `erc20-approve` | Approve a spender allowance | hand-write (`ops describe erc20-approve`) |
 | `erc721-transfer` | Transfer an NFT (verifies ownership first) | `scaffold sweep-nft` / `distribute-nft`, or `ops describe erc721-transfer` |
 | `erc721-approve` | Approve one NFT (`tokenId`) or a whole collection (`all:true`) | hand-write (`ops describe erc721-approve`) |
-| `contract-call` | Call an arbitrary contract method | hand-write (`ops describe contract-call`) |
+| `contract-call` | Call an arbitrary contract method | `scaffold call-range`, or hand-write (`ops describe contract-call`). Full `fn` signature needs no ABI. |
 | `raw-tx` | Broadcast pre-built calldata | hand-write |
 
 Run `ops describe <type>` for a ready-to-edit example of any of these.
@@ -136,16 +136,26 @@ re-checks ownership on-chain at run time, so stale enumeration can't push a bad 
 
 **Batch mint/claim from a wallet index range (same call, fixed args)**
 ```bash
-# Mint(0,1) from idx 1..99. fn signature + args validated once up front.
-ABI='[{"name":"mint","type":"function","stateMutability":"nonpayable","inputs":[{"type":"uint256"},{"type":"uint256"}],"outputs":[]}]'
+# Mint(0,1) from idx 1..99 — NO --abi needed, the fn signature carries the types.
+# Validated once up front (encoded with ethers), so bad fn/args fail immediately.
 node dist/index.js scaffold call-range --chain base --to 0xContract \
-  --abi "$ABI" --fn "mint(uint256,uint256)" --args "0,1" \
-  --from-idx 1 --to-idx 99 --out mint.json
+  --fn "mint(uint256,uint256)" --args "0,1" \
+  --from-idx 1 --to-idx 99 --parallel 5 --delay-ms 200 --out mint.json
 node dist/index.js validate mint.json && node dist/index.js run mint.json --yes
-# Paid mint: add --value wei:N (per call). Built-in ABI: --abi erc721. No args: --args ""
+# --abi ONLY needed for a bare fn name: --abi erc721 --fn claim
+# Paid mint: --value wei:N (per call). No args: --args "". Skip indices: --skip 3,7
+# --parallel N fans out ACROSS wallets (each idx is independent); --delay-ms throttles RPC.
+# Override concurrency at run time too: run mint.json --yes --parallel 10 --delay-ms 100
 ```
 > Each wallet needs gas. FUND THE RANGE FIRST, then mint:
 > `scaffold distribute --from 0xFunder --to-idx 1 --to-idx-end 99 --token native --per 0.002 --split fixed`
+
+**Check gas spent (after a run)**
+```bash
+node dist/index.js history --plan mint --gas    # native cost per tx + total (gasUsed × gasPrice)
+node dist/index.js history --plan mint --usd     # adds $ value at spot (ETH-gas chains)
+```
+
 
 **Inspect**
 ```bash
